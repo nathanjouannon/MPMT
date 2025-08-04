@@ -26,4 +26,54 @@ public class Notification {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    // Getters and setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public LocalDateTime getSentAt() {
+        return sentAt;
+    }
+
+    public void setSentAt(LocalDateTime sentAt) {
+        this.sentAt = sentAt;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

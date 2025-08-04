@@ -30,4 +30,62 @@ public class Invitation {
     @ManyToOne
     @JoinColumn(name = "invited_by", nullable = false)
     private User invitedBy;
+
+    // Getters and setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getSentAt() {
+        return sentAt;
+    }
+
+    public void setSentAt(LocalDateTime sentAt) {
+        this.sentAt = sentAt;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public User getInvitedBy() {
+        return invitedBy;
+    }
+
+    public void setInvitedBy(User invitedBy) {
+        this.invitedBy = invitedBy;
+    }
 }

@@ -43,4 +43,93 @@ public class User {
 
     @OneToMany(mappedBy = "invitedBy")
     private List<Invitation> sentInvitations;
+
+    // getter and setters
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public List<Project> getOwnedProjects() {
+        return ownedProjects;
+    }
+
+    public void setOwnedProjects(List<Project> ownedProjects) {
+        this.ownedProjects = ownedProjects;
+    }
+
+    public List<ProjectMember> getMemberships() {
+        return memberships;
+    }
+
+    public void setMemberships(List<ProjectMember> memberships) {
+        this.memberships = memberships;
+    }
+
+    public List<TaskAssignment> getAssignedTasks() {
+        return assignedTasks;
+    }
+
+    public void setAssignedTasks(List<TaskAssignment> assignedTasks) {
+        this.assignedTasks = assignedTasks;
+    }
+
+    public List<TaskHistory> getTaskHistories() {
+        return taskHistories;
+    }
+
+    public void setTaskHistories(List<TaskHistory> taskHistories) {
+        this.taskHistories = taskHistories;
+    }
+
+    public List<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(List<Notification> notifications) {
+        this.notifications = notifications;
+    }
+
+    public List<Invitation> getSentInvitations() {
+        return sentInvitations;
+    }
+
+    public void setSentInvitations(List<Invitation> sentInvitations) {
+        this.sentInvitations = sentInvitations;
+    }
 }
