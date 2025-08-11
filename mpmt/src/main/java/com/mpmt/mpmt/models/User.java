@@ -1,5 +1,6 @@
 package com.mpmt.mpmt.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ public class User {
     private String email;
 
     @Column(name = "password", nullable = false, length = 255)
+    @JsonIgnore
     private String password;
 
     @Column(name = "created_at")
@@ -27,21 +29,27 @@ public class User {
 
     // Relations
     @OneToMany(mappedBy = "owner")
+    @JsonIgnore
     private List<Project> ownedProjects;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<ProjectMember> memberships;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<TaskAssignment> assignedTasks;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<TaskHistory> taskHistories;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Notification> notifications;
 
     @OneToMany(mappedBy = "invitedBy")
+    @JsonIgnore
     private List<Invitation> sentInvitations;
 
     // getter and setters

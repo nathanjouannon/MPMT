@@ -8,6 +8,7 @@ import com.mpmt.mpmt.models.User;
 import com.mpmt.mpmt.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -16,6 +17,11 @@ import java.util.Optional;
 public class AuthServiceImpl implements AuthService {
     @Autowired
     private UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public AuthServiceImpl(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public User register(RegisterRequest request) {
@@ -26,8 +32,8 @@ public class AuthServiceImpl implements AuthService {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
-        user.setPassword((request.getPassword())); // Attention password en clair
         user.setCreatedAt(LocalDateTime.now());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         return userRepository.save(user);
     }
@@ -42,8 +48,8 @@ public class AuthServiceImpl implements AuthService {
 
         User user = optionalUser.get();
 
-        if (!user.getPassword().equals(request.getPassword())) {
-            throw new RuntimeException("Mot de passe incorrect.");
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
         }
 
         String token = com.mpmt.util.JwtUtil.generateToken(user.getEmail());

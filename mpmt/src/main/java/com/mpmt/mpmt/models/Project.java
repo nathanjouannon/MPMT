@@ -24,7 +24,7 @@ public class Project {
 
     // Relations
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(name = "owner_id", nullable = true)
     private User owner;
 
     @OneToMany(mappedBy = "project")
