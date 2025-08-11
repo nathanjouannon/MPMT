@@ -1,0 +1,21 @@
+<div class="dashboard-container">
+  <!-- Drawer -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Mpmt</h2>
+    </div>
+    <nav class="nav-links">
+      <a routerLink="projects" routerLinkActive="active">Projets</a>
+      <a routerLink="tasks" routerLinkActive="active">Tâches</a>
+    </nav>
+    <div class="logout-section">
+      <button (click)="logout()">Déconnexion</button>
+    </div>
+  </aside>
+
+  <!-- Contenu principal -->
+  <main class="main-content">
+    <!-- différentes sous-pages, projet, taches... -->
+   <router-outlet /> 
+  </main>
+</div>

@@ -1,1 +1,19 @@
-<p>register-page works!</p>
+<div class="container">
+    <!-- BOUTON RETOUR -->
+    <div class="back-button">
+      <a routerLink="/" class="back-link">← Retour</a>
+    </div>
+
+    <h1 class="title">Créer un compte</h1>
+    
+    <form (ngSubmit)="register()" #form="ngForm" class="form">
+      <input type="text" [(ngModel)]="username" name="username" placeholder="Nom d'utilisateur" required />
+      <input type="email" [(ngModel)]="email" name="email" placeholder="Email" required />
+      <input type="password" [(ngModel)]="password" name="password" placeholder="Mot de passe" required />
+    
+      <button class="btn" type="submit">S’inscrire</button>
+      <p *ngIf="error" class="error">{{ error }}</p>
+    </form>
+  
+    <a routerLink="/login" class="btn-outline small">Déjà un compte ? Se connecter</a>
+</div>

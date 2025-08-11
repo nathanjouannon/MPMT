@@ -1,0 +1,67 @@
+
+<div class="header">
+    <h1 class="projets_title">Liste des projets</h1>
+    <button class="create-btn" (click)="createProject()">+ Créer un projet</button>
+</div>
+
+<!-- Formulaire. TODO deplacé dans un composant spéciale-->
+<div *ngIf="showCreateForm" class="project-card">
+  <h2>Créer un projet</h2>
+
+  <form #createForm="ngForm" (ngSubmit)="onCreateProject(createForm)">
+    <input
+      name="name"
+      [(ngModel)]="newProject.name"
+      placeholder="Nom du projet"
+      required
+    />
+
+    <input
+      name="description"
+      [(ngModel)]="newProject.description"
+      placeholder="Description"
+      required
+    />
+
+    <input
+      name="start_date"
+      [(ngModel)]="newProject.start_date"
+      type="datetime-local"
+      required
+    />
+
+    <input
+      name="owner_id"
+      [(ngModel)]="newProject.owner_id"
+      type="number"
+      placeholder="ID propriétaire"
+      required
+    />
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="createForm.invalid">Créer</button>
+      <button type="button" (click)="cancelCreate()">Annuler</button>
+    </div>
+  </form>
+</div>
+
+<div *ngIf="loading">Chargement des projets...</div>
+<div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+<div *ngFor="let project of projects" class="project-card" (click)="openDrawer(project)">
+  <h2>{{ project.name }}</h2>
+  <p>{{ project.description }}</p>
+  <div class="tags">
+    <span class="tag">Start date: {{ project.startDate | date: 'dd/MM/yyyy' }}</span>
+    <span class="tag">Owner: {{ project.owner.username }}</span>
+  </div>
+</div>
+
+<app-project-drawer
+  [project]="selectedProject"
+  [isOpen]="isDrawerOpen"
+  (close)="closeDrawer()"
+  (projectUpdated)="handleProjectUpdated()"
+  (projectDeleted)="onProjectDeleted($event)"
+>
+</app-project-drawer>

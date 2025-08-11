@@ -1,1 +1,18 @@
-<p>login-page works!</p>
+<div class="container">
+  <!-- BOUTON RETOUR -->
+  <div class="back-button">
+    <a routerLink="/" class="back-link">← Retour</a>
+  </div>
+
+  <h1 class="title">Connexion</h1>
+
+  <form (ngSubmit)="login()" #form="ngForm" class="form">
+    <input type="email" [(ngModel)]="email" name="email" placeholder="Email" required />
+    <input type="password" [(ngModel)]="password" name="password" placeholder="Mot de passe" required />
+
+    <button class="btn" type="submit">Se connecter</button>
+    <p *ngIf="error" class="error">{{ error }}</p>
+  </form>
+
+  <a routerLink="/register" class="btn-outline small">Pas encore de compte ? S’inscrire</a>
+</div>

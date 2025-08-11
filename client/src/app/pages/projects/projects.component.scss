@@ -1,0 +1,129 @@
+div {
+    color: #c8c8c8;
+}
+.projets_title {
+    font-size: 2em;
+    color: #c8c8c8;
+}
+
+// header
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+.create-btn {
+  background-color: #c8c8c8;
+  color: #252525;
+  border: 0.25px solid #c8c8c8;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  height: 45px;
+  cursor: pointer;
+}
+
+.create-btn:hover {
+    background-color: #252525;
+    color: #c8c8c8;
+    border: 0.25px solid #c8c8c8;
+    transition: 0.3s ease;
+}
+
+
+//form
+form {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+form input {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+form input:focus {
+  border-color: #252525;
+  outline: none;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.form-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.form-actions button[type="submit"] {
+  background-color: #c67e21;
+  color: #fff;
+}
+
+.form-actions button[type="submit"]:disabled {
+  background-color: #c67e2174;
+  cursor: not-allowed;
+}
+
+.form-actions button[type="button"] {
+  background-color: #ccc;
+  color: #333;
+}
+
+.form-actions button:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+
+// list of projects
+.project-card {
+  background-color: #c8c8c8;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.project-card h2 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  font-size: 18px;
+}
+.project-card p {
+    font-size: 16px;
+}
+
+.tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.tag {
+  background-color: #c67e21;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.85em;
+  user-select: none;
+}

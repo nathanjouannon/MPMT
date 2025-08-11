@@ -1,0 +1,62 @@
+<div class="drawer-backdrop" *ngIf="isOpen" (click)="onBackdropClick()"></div>
+
+<div class="drawer" [class.open]="isOpen" (click)="$event.stopPropagation()">
+  <button class="close-btn" (click)="close.emit()">✖</button>
+  
+    <div *ngIf="project">
+       <div class="section" *ngIf="!editMode">
+        <div class="section-header">
+          <h2>{{ project.name }}</h2>
+          <button class="create-task-btn" (click)="editProject()">Modifier</button>
+        </div>
+        <p>{{ project.description }}</p>
+        <div class="tags">
+          <span class="tag">Start date: {{ project.startDate | date: 'dd/MM/yyyy' }}</span>
+          <span class="tag">Owner: {{ project.owner.username }}</span>
+        </div>
+      </div>
+
+      <div class="section" *ngIf="editMode">
+        <form #editForm="ngForm" (ngSubmit)="onUpdateProject(editForm)">
+          <input name="name" [(ngModel)]="editedProject.name" placeholder="Nom du projet" required />
+
+          <input name="description" [(ngModel)]="editedProject.description" placeholder="Description" required />
+
+          <input name="start_date" [(ngModel)]="editedProject.start_date" type="datetime-local" required />
+
+          <input name="owner_id" [(ngModel)]="editedProject.owner_id" type="number" placeholder="ID propriétaire" required />
+
+          <div class="form-actions">
+            <button type="submit" [disabled]="editForm.invalid">Enregistrer</button>
+            <button type="button" (click)="cancelEdit()">Annuler</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="section">
+          <div class="section-header">
+              <h3>Membres</h3>
+              <button class="create-task-btn" (click)="addMember()">+ Ajouter un membre</button>
+          </div>
+          <ul>
+            <li *ngFor="let member of project.members">{{ member.username }}</li>
+          </ul>
+      </div>
+
+      <div class="section">
+          <div class="section-header">
+              <h3>Tâches</h3>
+              <button class="create-task-btn" (click)="createTask()">+ Créer une tâche</button>
+          </div>
+          <ul>
+            <li *ngFor="let task of project.tasks">{{ task.title }}</li>
+          </ul>
+      </div>
+
+        <div class="section">
+            <div class="section-delete">
+                <button class="delete-btn" (click)="deleteProject()">Supprimer ce projet</button>
+            </div>
+        </div>
+    </div>
+</div>
