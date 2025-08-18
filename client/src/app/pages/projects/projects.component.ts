@@ -42,12 +42,10 @@ export class ProjectsComponent implements OnInit {
     name: string;
     description: string;
     start_date: string;
-    owner_id: number | null;
   } = {
     name: '',
     description: '',
     start_date: '',
-    owner_id: null
   };
 
   private apiUrl = 'http://localhost:8080/api/project';
@@ -90,7 +88,7 @@ export class ProjectsComponent implements OnInit {
       name: this.newProject.name,
       description: this.newProject.description,
       start_date: this.formatDateForApi(this.newProject.start_date),
-      owner_id: Number(this.newProject.owner_id)
+      owner_id: Number(localStorage.getItem('current_userID'))
     };
 
     this.http.post(this.apiUrl, payload).subscribe({
@@ -113,7 +111,7 @@ export class ProjectsComponent implements OnInit {
   }
 
   private resetFormModel() {
-    this.newProject = { name: '', description: '', start_date: '', owner_id: null };
+    this.newProject = { name: '', description: '', start_date: ''};
   }
 
   openDrawer(project: Project) {

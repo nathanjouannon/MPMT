@@ -30,14 +30,6 @@
       required
     />
 
-    <input
-      name="owner_id"
-      [(ngModel)]="newProject.owner_id"
-      type="number"
-      placeholder="ID propriétaire"
-      required
-    />
-
     <div class="form-actions">
       <button type="submit" [disabled]="createForm.invalid">Créer</button>
       <button type="button" (click)="cancelCreate()">Annuler</button>

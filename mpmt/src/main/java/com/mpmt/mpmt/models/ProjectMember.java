@@ -1,5 +1,6 @@
 package com.mpmt.mpmt.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -12,7 +13,7 @@ public class ProjectMember {
     private Long id;
 
     @Column(length = 20)
-    private String role;
+    private ProjectMemberRole role;
 
     @Column(name = "joined_at")
     private LocalDateTime joinedAt;
@@ -22,6 +23,7 @@ public class ProjectMember {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
@@ -36,11 +38,11 @@ public class ProjectMember {
         this.id = id;
     }
 
-    public String getRole() {
+    public ProjectMemberRole getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(ProjectMemberRole role) {
         this.role = role;
     }
 

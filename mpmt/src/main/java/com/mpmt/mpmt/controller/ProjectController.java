@@ -1,8 +1,10 @@
 package com.mpmt.mpmt.controller;
 
+import com.mpmt.mpmt.dto.ProjectMemberRequest;
 import com.mpmt.mpmt.dto.ProjectRequest;
 import com.mpmt.mpmt.dto.UpdateProjectRequest;
 import com.mpmt.mpmt.models.Project;
+import com.mpmt.mpmt.models.ProjectMember;
 import com.mpmt.mpmt.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -32,5 +34,10 @@ public class ProjectController {
     @DeleteMapping("{project_id}")
     public void deleteProject(@PathVariable("project_id") Long project_id) {
         projectService.deleteProject(project_id);
+    }
+
+    @PostMapping("/addMember")
+    public ProjectMember addProjectMember(@RequestBody ProjectMemberRequest request) {
+        return projectService.addMember(request);
     }
 }
