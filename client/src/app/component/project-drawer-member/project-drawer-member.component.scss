@@ -1,0 +1,155 @@
+/* SECTIONS */
+.section {
+  border-top: 2px solid #eee;
+  padding-top: 16px;
+  margin-top: 20px;
+
+  h3 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    border-left: 4px solid #c67e21b0;
+    padding-left: 8px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+}
+.section-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.create-task-btn {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 8px 14px;
+  background: #c67e21;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+
+  &:hover {
+    background: #c67e21b5;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+// MEMBER
+// From
+.add-member-form {
+  background-color: transparent;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+
+    div {
+        display: flex;
+        flex-direction: column;
+    }
+
+    label {
+      font-weight: 500;
+      margin-bottom: 0.2rem;
+    }
+
+    input,
+    select {
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    .form-button {
+        display: flex;
+        flex-direction: row;
+    }
+
+    button {
+      width: fit-content;
+     padding: 6px 12px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+      margin-right: 20px;
+
+      &:first-of-type {
+        background-color: #c67e21;
+        color: white;
+
+        &:hover {
+          background-color: #c67e21bc;
+        }
+      }
+
+      &:last-of-type {
+        background-color: #ccc;
+        color: black;
+
+        &:hover {
+          background-color: #ccccccc3;
+        }
+      }
+    }
+  }
+}
+// List
+.members-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  .member-item {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 6px 10px;
+  }
+
+  .member-name {
+    font-weight: 500;
+    margin-right: 20px;
+  }
+
+  .member-role {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 6px;
+    text-transform: capitalize;
+
+    &.admin {
+      background-color: #fcc5c5;
+      color: #d32f2f;
+    }
+
+    &.member {
+      background-color: #e0f7fa;
+      color: #00796b;
+    }
+
+    &.observer {
+      background-color: #bef9b9;
+      color: #249901;
+    }
+  }
+}

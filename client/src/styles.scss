@@ -7,3 +7,17 @@
 body {
   font-family: 'Azeret Mono', monospace;
 }
+
+.toast-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2000 !important;
+  background-color: #ccc;
+  color: black;
+  border-radius: 20px;
+
+  div {
+    padding: 5px 10px;
+  }
+}

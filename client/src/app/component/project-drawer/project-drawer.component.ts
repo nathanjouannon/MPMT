@@ -3,11 +3,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Project } from '../../pages/projects/projects.component';
 import { FormsModule, NgForm } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { ProjectDrawerMemberComponent } from '../project-drawer-member/project-drawer-member.component';
 
 @Component({
   selector: 'app-project-drawer',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ProjectDrawerMemberComponent],
   templateUrl: './project-drawer.component.html',
   styleUrl: './project-drawer.component.scss'
 })
@@ -29,6 +30,10 @@ export class ProjectDrawerComponent {
   private apiUrl = 'http://localhost:8080/api/project';
 
   constructor(private http: HttpClient) {}
+
+  updateProject() {
+    this.projectUpdated.emit()
+  }
 
   onBackdropClick() {
     this.close.emit();
@@ -79,10 +84,6 @@ export class ProjectDrawerComponent {
 
   createTask() {
     console.log("crée une tache")
-  }
-
-  addMember() {
-    console.log("ajouter un membre"); 
   }
 
   deleteProject() {

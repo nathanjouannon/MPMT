@@ -33,15 +33,10 @@
         </form>
       </div>
 
-      <div class="section">
-          <div class="section-header">
-              <h3>Membres</h3>
-              <button class="create-task-btn" (click)="addMember()">+ Ajouter un membre</button>
-          </div>
-          <ul>
-            <li *ngFor="let member of project.members">{{ member.username }}</li>
-          </ul>
-      </div>
+      <app-project-drawer-member
+        [project]="project"
+        (updateProject)="updateProject()">
+      </app-project-drawer-member>
 
       <div class="section">
           <div class="section-header">

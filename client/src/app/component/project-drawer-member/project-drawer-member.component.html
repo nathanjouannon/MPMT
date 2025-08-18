@@ -1,0 +1,47 @@
+<!-- src/app/components/project-drawer-member/project-drawer-member.component.html -->
+<div class="section">
+  <div class="section-header">
+    <h3>Membres</h3>
+    <button class="create-task-btn" (click)="toggleForm()">+ Ajouter un membre</button>
+  </div>
+
+  <div *ngIf="showForm" class="add-member-form">
+    <form #createForm="ngForm" (ngSubmit)="onAddMember(createForm)">
+        <div>
+            <label>Email :</label>
+            <input 
+                name="userEmail"
+                [(ngModel)]="addMemberForm.userEmail"
+                placeholder="user email"
+                required
+             />
+        </div>
+        <div>
+            <label>Role :</label>
+            <select 
+                name="role"
+                [(ngModel)]="addMemberForm.role"
+                required
+            >
+                <option value="ADMIN">ADMIN</option>
+                <option value="MEMBER">MEMBER</option>
+                <option value="OBSERVER">OBSERVER</option>
+            </select>
+        </div>
+        <div class="form-button">
+            <button type="submit" [disabled]="createForm.invalid">Ajouter</button>
+            <button type="button" (click)="toggleForm()">Annuler</button>
+        </div>
+      </form>
+    </div>
+
+  <ul class="members-list">
+    <li *ngFor="let member of project?.members" class="member-item">
+      <span class="member-name">{{ member.user.username }}</span>
+      <span class="member-role" [ngClass]="member.role?.toLowerCase()">
+        {{ member.role }}
+      </span>
+    </li>
+  </ul>
+</div>
+
