@@ -4,11 +4,12 @@ import { Project } from '../../pages/projects/projects.component';
 import { FormsModule, NgForm } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ProjectDrawerMemberComponent } from '../project-drawer-member/project-drawer-member.component';
+import { ProjectDrawerTasksComponent } from '../project-drawer-tasks/project-drawer-tasks.component';
 
 @Component({
   selector: 'app-project-drawer',
   standalone: true,
-  imports: [CommonModule, FormsModule, ProjectDrawerMemberComponent],
+  imports: [CommonModule, FormsModule, ProjectDrawerMemberComponent, ProjectDrawerTasksComponent],
   templateUrl: './project-drawer.component.html',
   styleUrl: './project-drawer.component.scss'
 })

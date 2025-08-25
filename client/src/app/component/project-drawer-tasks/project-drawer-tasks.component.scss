@@ -1,0 +1,335 @@
+/* SECTIONS */
+.section {
+  border-top: 2px solid #eee;
+  padding-top: 16px;
+  margin-top: 20px;
+
+  h3 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    border-left: 4px solid #c67e21b0;
+    padding-left: 8px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+}
+
+.section-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.create-task-btn {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 8px 14px;
+  background: #c67e21;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+
+  &:hover {
+    background: #c67e21b5;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.task-item {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative; /* Pour le positionnement du bouton d'assignation */
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    
+    .assign-btn {
+      opacity: 1;
+    }
+  }
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.task-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.task-description {
+  margin: 8px 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.task-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 10px;
+}
+
+.task-indicators {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.task-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  
+  &.status-backlog {
+    background-color: #e9ecef;
+    color: #495057;
+  }
+  
+  &.status-todo {
+    background-color: #f0f0f0;
+    color: #666;
+  }
+  
+  &.status-in-progress {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  &.status-retro {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  &.status-done {
+    background-color: #d4edda;
+    color: #155724;
+  }
+}
+
+.task-priority {
+  padding: 3px 6px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  
+  &.priority-very-low {
+    background-color: #e9ecef;
+    color: #495057;
+  }
+  
+  &.priority-low {
+    background-color: #d1ecf1;
+    color: #0c5460;
+  }
+  
+  &.priority-medium {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  &.priority-high {
+    background-color: #ffe5d0;
+    color: #d63384;
+  }
+  
+  &.priority-very-high {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+}
+
+.task-due-date {
+  display: flex;
+  align-items: center;
+  
+  &:before {
+    content: "🗓️";
+    margin-right: 5px;
+  }
+}
+
+.task-assignee {
+  display: flex;
+  align-items: center;
+  
+  &:before {
+    content: "👤";
+    margin-right: 5px;
+  }
+}
+
+.no-tasks {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+  padding: 20px 0;
+}
+
+/* Style pour le bouton d'assignation */
+.assign-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: #4a6fa5;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0; /* Caché par défaut, visible au survol de la tâche */
+  
+  &:hover {
+    background-color: darken(#4a6fa5, 10%);
+  }
+  
+  i {
+    margin-right: 4px;
+  }
+}
+
+/* Style pour le formulaire d'assignation */
+.assign-form {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+    color: #333;
+  }
+}
+
+/* Styles pour le formulaire de création de tâche */
+.task-form {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+    color: #333;
+  }
+}
+
+.form-group {
+  margin-bottom: 16px;
+  
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #555;
+  }
+  
+  input, textarea, select {
+    width: 98%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    
+    &:focus {
+      outline: none;
+      border-color: #c67e21;
+      box-shadow: 0 0 0 2px rgba(198, 126, 33, 0.2);
+    }
+  }
+  
+  textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.half {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  
+  button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    
+    &.submit-btn {
+      background-color: #c67e21;
+      color: white;
+      border: none;
+      
+      &:hover {
+        background-color: darken(#c67e21, 10%);
+      }
+      
+      &:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+    }
+    
+    &.cancel-btn {
+      background-color: transparent;
+      color: #666;
+      border: 1px solid #ddd;
+      
+      &:hover {
+        background-color: #f0f0f0;
+      }
+    }
+  }
+}

@@ -1,0 +1,134 @@
+<div class="section">
+    <div class="section-header">
+        <h3>Tâches</h3>
+        <button class="create-task-btn" (click)="createTask()" *ngIf="!showTaskForm">+ Créer une tâche</button>
+    </div>
+    
+    <!-- Formulaire de création de tâche -->
+    <div class="task-form" *ngIf="showTaskForm">
+        <h4>Nouvelle tâche</h4>
+        <form (ngSubmit)="submitTask()" #taskForm="ngForm">
+            <div class="form-group">
+                <label for="title">Titre*</label>
+                <input 
+                    type="text" 
+                    id="title" 
+                    name="title" 
+                    [(ngModel)]="newTask.title" 
+                    required 
+                    placeholder="Titre de la tâche"
+                >
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description*</label>
+                <textarea 
+                    id="description" 
+                    name="description" 
+                    [(ngModel)]="newTask.description" 
+                    required 
+                    placeholder="Description de la tâche"
+                ></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="dueDate">Date d'échéance</label>
+                    <input 
+                        type="date" 
+                        id="dueDate" 
+                        name="dueDate" 
+                        [(ngModel)]="newTask.dueDate"
+                    >
+                </div>
+                
+                <div class="form-group half">
+                    <label for="endDate">Date de fin estimée</label>
+                    <input 
+                        type="date" 
+                        id="endDate" 
+                        name="endDate" 
+                        [(ngModel)]="newTask.endDate"
+                    >
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="status">Statut</label>
+                    <select 
+                        id="status" 
+                        name="status" 
+                        [(ngModel)]="newTask.status"
+                    >
+                        <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+                    </select>
+                </div>
+                
+                <div class="form-group half">
+                    <label for="priority">Priorité</label>
+                    <select 
+                        id="priority" 
+                        name="priority" 
+                        [(ngModel)]="newTask.priority"
+                    >
+                        <option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" [disabled]="!taskForm.form.valid" class="submit-btn">Créer</button>
+                <button type="button" (click)="cancelCreateTask()" class="cancel-btn">Annuler</button>
+            </div>
+        </form>
+    </div>
+    <ng-container *ngIf="project && project.tasks && project.tasks.length > 0">
+        <ul>
+            <li *ngFor="let task of project.tasks" class="task-item">
+            <div class="task-header">
+                <span class="task-title">{{ task.title }}</span>
+                <div class="task-indicators">
+                    <span class="task-status" [ngClass]="getTaskStatusClass(task.status)">{{ task.status }}</span>
+                    <span class="task-priority" [ngClass]="getTaskPriorityClass(task.priority)">{{ task.priority }}</span>
+                </div>
+            </div>
+            <p class="task-description">{{ task.description }}</p>
+            <div class="task-details">
+                <span class="task-due-date" *ngIf="task.dueDate">Échéance: {{ task.dueDate | date: 'dd/MM/yyyy' }}</span>
+                <span class="task-assignee" *ngIf="task.assignments && task.assignments.length > 0">
+                    Assignée à: {{ task.assignments[0].user.username }}
+                    <span *ngIf="task.assignments.length > 1">(+{{ task.assignments.length - 1 }})</span>
+                </span>
+            </div>
+            <button class="assign-btn" (click)="openAssignForm(task)">
+                <i class="fas fa-user-plus"></i> Assigner
+            </button>
+        </li>
+        </ul>
+    </ng-container>
+    
+    <!-- Formulaire d'assignation de tâche -->
+    <div class="assign-form" *ngIf="showAssignForm && currentAssigningTask">
+        <h4>Assigner la tâche "{{ currentAssigningTask.title }}"</h4>
+        <form (ngSubmit)="submitAssignTask()" #assignForm="ngForm">
+            <div class="form-group">
+                <label for="userEmail">Email de l'utilisateur*</label>
+                <input 
+                    type="email" 
+                    id="userEmail" 
+                    name="userEmail" 
+                    [(ngModel)]="assignFormData.userEmailToAssign" 
+                    required 
+                    placeholder="Entrez l'email de l'utilisateur"
+                >
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" [disabled]="!assignForm.form.valid" class="submit-btn">Assigner</button>
+                <button type="button" (click)="cancelAssignTask()" class="cancel-btn">Annuler</button>
+            </div>
+        </form>
+    </div>
+    <p *ngIf="!project || !project.tasks || project.tasks.length === 0" class="no-tasks">Aucune tâche pour ce projet.</p>
+</div>

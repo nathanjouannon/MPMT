@@ -33,20 +33,17 @@
         </form>
       </div>
 
+      <!-- section membres -->
       <app-project-drawer-member
         [project]="project"
         (updateProject)="updateProject()">
       </app-project-drawer-member>
 
-      <div class="section">
-          <div class="section-header">
-              <h3>Tâches</h3>
-              <button class="create-task-btn" (click)="createTask()">+ Créer une tâche</button>
-          </div>
-          <ul>
-            <li *ngFor="let task of project.tasks">{{ task.title }}</li>
-          </ul>
-      </div>
+      <!-- sections tâches -->
+      <app-project-drawer-tasks
+        [project]="project"
+        (updateProject)="updateProject()">
+      </app-project-drawer-tasks>
 
         <div class="section">
             <div class="section-delete">

@@ -1,5 +1,6 @@
 package com.mpmt.mpmt.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,11 +25,13 @@ public class Task {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(length = 10)
-    private String priority = "MEDIUM";
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TaskPriority priority = TaskPriority.LOW; // par défaut niveau 2
 
-    @Column(length = 20)
-    private String status = "TODO";
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TaskStatus status = TaskStatus.BACKLOG; // par défaut backlog
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -37,6 +40,7 @@ public class Task {
     private LocalDateTime updatedAt;
 
     // Relations
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
@@ -47,7 +51,7 @@ public class Task {
     @OneToMany(mappedBy = "task")
     private List<TaskHistory> history;
 
-    // Getters and Setters
+    // Getters et setters ...
 
     public Long getId() {
         return id;
@@ -89,28 +93,20 @@ public class Task {
         this.endDate = endDate;
     }
 
-    public String getPriority() {
+    public TaskPriority getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(TaskPriority priority) {
         this.priority = priority;
     }
 
-    public String getStatus() {
+    public TaskStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(TaskStatus status) {
         this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 
     public LocalDateTime getUpdatedAt() {
@@ -121,6 +117,14 @@ public class Task {
         this.updatedAt = updatedAt;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public Project getProject() {
         return project;
     }
@@ -129,19 +133,19 @@ public class Task {
         this.project = project;
     }
 
-    public List<TaskAssignment> getAssignments() {
-        return assignments;
-    }
-
-    public void setAssignments(List<TaskAssignment> assignments) {
-        this.assignments = assignments;
-    }
-
     public List<TaskHistory> getHistory() {
         return history;
     }
 
     public void setHistory(List<TaskHistory> history) {
         this.history = history;
+    }
+
+    public List<TaskAssignment> getAssignments() {
+        return assignments;
+    }
+
+    public void setAssignments(List<TaskAssignment> assignments) {
+        this.assignments = assignments;
     }
 }

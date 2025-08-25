@@ -1,5 +1,6 @@
 package com.mpmt.mpmt.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -10,6 +11,7 @@ public class TaskAssignment {
     private Long id;
 
     // Relation
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
