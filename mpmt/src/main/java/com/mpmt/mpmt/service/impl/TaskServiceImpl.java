@@ -1,10 +1,7 @@
 package com.mpmt.mpmt.service.impl;
 
 import com.mpmt.mpmt.dao.*;
-import com.mpmt.mpmt.dto.TaskAssignmentRequest;
-import com.mpmt.mpmt.dto.TaskRequest;
-import com.mpmt.mpmt.dto.UpdateTaskPriorityRequest;
-import com.mpmt.mpmt.dto.UpdateTaskStatusRequest;
+import com.mpmt.mpmt.dto.*;
 import com.mpmt.mpmt.errors.ForbiddenActionException;
 import com.mpmt.mpmt.errors.ResourceNotFoundException;
 import com.mpmt.mpmt.errors.UserAlreadyAssignException;
@@ -33,6 +30,8 @@ public class TaskServiceImpl implements TaskService {
     private EmailService emailService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private TaskHistoryRepository taskHistoryRepository;
 
     @Override
     public Task createTask(TaskRequest request) {
@@ -70,58 +69,6 @@ public class TaskServiceImpl implements TaskService {
         task.setPriority(request.getPriority() != null ? request.getPriority() : TaskPriority.LOW);
         task.setStatus(request.getStatus() != null ? request.getStatus() : TaskStatus.BACKLOG);
         task.setCreatedAt(LocalDateTime.now());
-        task.setUpdatedAt(LocalDateTime.now());
-
-        return taskRepository.save(task);
-    }
-
-    @Override
-    public Task updateTaskPriority(UpdateTaskPriorityRequest request) {
-        Task task = taskRepository.findById(request.getTaskId())
-                .orElseThrow(() -> new ResourceNotFoundException("Tâche non trouvée"));
-
-        Project project = task.getProject();
-        User requestingUser = userRepository.findById(request.getUserRequestingId())
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur demandeur non trouvé"));
-
-        boolean isOwner = project.getOwner().getId().equals(requestingUser.getId());
-        if (!isOwner) {
-            ProjectMember requesterMembership = projectMemberRepository
-                    .findByProjectAndUser(project, requestingUser)
-                    .orElseThrow(() -> new ForbiddenActionException("Vous n'êtes pas membre de ce projet"));
-
-            if (requesterMembership.getRole() == ProjectMemberRole.OBSERVER) {
-                throw new ForbiddenActionException("Les observateurs ne peuvent pas modifier la priorité d’une tâche");
-            }
-        }
-
-        task.setPriority(request.getPriority());
-        task.setUpdatedAt(LocalDateTime.now());
-
-        return taskRepository.save(task);
-    }
-
-    @Override
-    public Task updateTaskStatus(UpdateTaskStatusRequest request) {
-        Task task = taskRepository.findById(request.getTaskId())
-                .orElseThrow(() -> new ResourceNotFoundException("Tâche non trouvée"));
-
-        Project project = task.getProject();
-        User requestingUser = userRepository.findById(request.getUserRequestingId())
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur demandeur non trouvé"));
-
-        boolean isOwner = project.getOwner().getId().equals(requestingUser.getId());
-        if (!isOwner) {
-            ProjectMember requesterMembership = projectMemberRepository
-                    .findByProjectAndUser(project, requestingUser)
-                    .orElseThrow(() -> new ForbiddenActionException("Vous n'êtes pas membre de ce projet"));
-
-            if (requesterMembership.getRole() == ProjectMemberRole.OBSERVER) {
-                throw new ForbiddenActionException("Les observateurs ne peuvent pas modifier le statut d’une tâche");
-            }
-        }
-
-        task.setStatus(request.getStatus());
         task.setUpdatedAt(LocalDateTime.now());
 
         return taskRepository.save(task);
@@ -190,4 +137,78 @@ public class TaskServiceImpl implements TaskService {
         return taskAssignmentRepository.save(taskAssignment);
     }
 
+    public Task updateTask(Long taskId, TaskUpdateRequest request) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Tâche introuvable"));
+
+        User requestingUser = userRepository.findById(request.getUserRequestingId())
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        Project project = task.getProject();
+
+        // Vérifier si le user est owner ou admin/membre du projet
+        boolean isOwner = project.getOwner().getId().equals(requestingUser.getId());
+        boolean isMember = false;
+        if (!isOwner) {
+            ProjectMember membership = projectMemberRepository
+                    .findByProjectAndUser(project, requestingUser)
+                    .orElseThrow(() -> new ForbiddenActionException("Vous n'êtes pas membre de ce projet"));
+
+            if (membership.getRole() == ProjectMemberRole.ADMIN || membership.getRole() == ProjectMemberRole.MEMBER) {
+                isMember = true;
+            }
+        }
+
+        if (!isOwner && !isMember) {
+            throw new ForbiddenActionException("Vous n'avez pas les droits pour modifier cette tâche");
+        }
+
+        // Comparer et appliquer les modifications
+        if (request.getTitle() != null && !request.getTitle().equals(task.getTitle())) {
+            saveHistory("title", task.getTitle(), request.getTitle(), task, requestingUser);
+            task.setTitle(request.getTitle());
+        }
+
+        if (request.getDescription() != null && !request.getDescription().equals(task.getDescription())) {
+            saveHistory("description", task.getDescription(), request.getDescription(), task, requestingUser);
+            task.setDescription(request.getDescription());
+        }
+
+        if (request.getPriority() != null && !request.getPriority().equals(task.getPriority())) {
+            saveHistory("priority", String.valueOf(task.getPriority()), String.valueOf(request.getPriority()), task, requestingUser);
+            task.setPriority(request.getPriority());
+        }
+
+        if (request.getStatus() != null && !request.getStatus().equals(task.getStatus())) {
+            saveHistory("status", String.valueOf(task.getStatus()), String.valueOf(request.getStatus()), task, requestingUser);
+            task.setStatus(request.getStatus());
+        }
+
+        if (request.getDueDate() != null && !request.getDueDate().equals(task.getDueDate())) {
+            saveHistory("dueDate",
+                    task.getDueDate() != null ? task.getDueDate().toString() : null,
+                    request.getDueDate().toString(),
+                    task, requestingUser);
+            task.setDueDate(request.getDueDate());
+        }
+
+        return taskRepository.save(task);
+    }
+
+    private void saveHistory(String field, String oldValue, String newValue, Task task, User user) {
+        TaskHistory history = new TaskHistory();
+        history.setFieldChanged(field);
+        history.setOldValue(oldValue);
+        history.setNewValue(newValue);
+        history.setChangedAt(LocalDateTime.now());
+        history.setTask(task);
+        history.setUser(user);
+
+        taskHistoryRepository.save(history);
+    }
+
+    @Override
+    public Iterable<Task> getAllTasks() {
+        return taskRepository.findAll();
+    }
 }

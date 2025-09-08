@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: mpmt-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mpmt
+      MYSQL_USER: mpmt_user
+      MYSQL_PASSWORD: mpmt_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - mpmt-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Spring Boot application
+  backend:
+    build: ./mpmt
+    container_name: mpmt-backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/mpmt?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=mpmt_user
+      - SPRING_DATASOURCE_PASSWORD=mpmt_password
+      - JWT_SECRET=mpmt_secret_key_for_jwt_authentication_secure_2023
+    ports:
+      - "8080:8080"
+    networks:
+      - mpmt-network
+
+  # Frontend Angular application
+  frontend:
+    build: ./client
+    container_name: mpmt-frontend
+    restart: always
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+    networks:
+      - mpmt-network
+      
+  # phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: mpmt-phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8082:80"
+    depends_on:
+      - db
+    networks:
+      - mpmt-network
+
+networks:
+  mpmt-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
