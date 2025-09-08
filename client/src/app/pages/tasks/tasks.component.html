@@ -1,1 +1,60 @@
-<p>tasks works!</p>
+<div class="tasks-container">
+  <h1 class="page-title">Toutes les tâches</h1>
+
+  <div class="board-container">
+    <div class="board-scroll">
+      <div class="columns-container">
+        <!-- Une colonne pour chaque statut -->
+        <div *ngFor="let status of statuses" class="status-column">
+          <div class="column-header">
+            <h2>{{ statusLabels[status] }}</h2>
+            <div class="task-count">{{ filteredTasks[status].length }}</div>
+          </div>
+          
+          <!-- Les tâches dans cette colonne -->
+          <div class="column-tasks">
+            <div *ngFor="let task of filteredTasks[status]" 
+                 class="task-card"
+                 (click)="openTaskDrawer(task)">
+              <div class="task-title">{{ task.title }}</div>
+              <div class="task-description" *ngIf="task.description">
+                {{ task.description.length > 80 ? task.description.substring(0, 80) + '...' : task.description }}
+              </div>
+              <div class="task-meta">
+                <div *ngIf="task.dueDate" class="task-due-date">
+                  Échéance: {{ task.dueDate | date: 'dd/MM/yyyy' }}
+                </div>
+                <div class="task-priority" [ngClass]="getTaskPriorityClass(task.priority)">
+                  {{ task.priority }}
+                </div>
+              </div>
+              <div class="task-assignments" *ngIf="task.assignments && task.assignments.length">
+                <div class="task-assignees">
+                  <div class="user-avatar" *ngFor="let assignment of task.assignments.slice(0, 3)">
+                    {{ assignment.user.username.charAt(0).toUpperCase() }}
+                  </div>
+                  <div *ngIf="task.assignments.length > 3" class="more-assignees">
+                    +{{ task.assignments.length - 3 }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Message si aucune tâche -->
+            <div *ngIf="filteredTasks[status].length === 0" class="empty-column">
+              Aucune tâche
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Task Drawer -->
+<app-task-drawer
+  [task]="selectedTask"
+  [isOpen]="isTaskDrawerOpen"
+  (close)="closeTaskDrawer()"
+  (taskUpdated)="onTaskUpdated()"
+></app-task-drawer>

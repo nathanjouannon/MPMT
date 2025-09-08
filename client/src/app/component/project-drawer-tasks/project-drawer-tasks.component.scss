@@ -18,6 +18,491 @@
 }
 
 .section-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.create-task-btn {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 8px 14px;
+  background: #c67e21;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+
+  &:hover {
+    background: #c67e21b5;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.task-item {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  cursor: pointer;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #f5f5f5;
+  }
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.task-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.task-description {
+  margin: 8px 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.task-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 10px;
+}
+
+.task-indicators {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.task-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  
+  &.status-backlog {
+    background-color: #e9ecef;
+    color: #495057;
+  }
+  
+  &.status-todo {
+    background-color: #f0f0f0;
+    color: #666;
+  }
+  
+  &.status-in-progress {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  &.status-retro {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  &.status-done {
+    background-color: #d4edda;
+    color: #155724;
+  }
+}
+
+.task-priority {
+  padding: 3px 6px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  
+  &.priority-very-low {
+    background-color: #e9ecef;
+    color: #495057;
+  }
+  
+  &.priority-low {
+    background-color: #d1ecf1;
+    color: #0c5460;
+  }
+  
+  &.priority-medium {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  &.priority-high {
+    background-color: #ffe5d0;
+    color: #d63384;
+  }
+  
+  &.priority-very-high {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+}
+
+.task-due-date {
+  display: flex;
+  align-items: center;
+  
+  &:before {
+    content: "🗓️";
+    margin-right: 5px;
+  }
+}
+
+.task-assignee {
+  display: flex;
+  align-items: center;
+  
+  &:before {
+    content: "👤";
+    margin-right: 5px;
+  }
+}
+
+.no-tasks {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+  padding: 20px 0;
+}
+
+/* Boutons d'action */
+.task-actions {
+  margin-top: 10px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+
+  button {
+    margin-left: 10px;
+  }
+}
+
+/* Suppression de la règle qui rendait les actions visibles uniquement au survol */
+
+.assign-btn, .edit-btn {
+  background-color: white;
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  i {
+    margin-right: 4px;
+  }
+}
+
+.assign-btn {
+  border-color: #4a6fa5;
+  color: #4a6fa5;
+  
+  &:hover {
+    background-color: #4a6fa5;
+    color: white;
+  }
+}
+
+.edit-btn {
+  border-color: #c67e21;
+  color: #c67e21;
+  
+  &:hover {
+    background-color: #c67e21;
+    color: white;
+  }
+}
+
+/* Formulaire d'assignation */
+.inline-assign-form {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: calc(100% - 40px);
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 4px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+.assign-form-inline {
+  display: flex;
+  width: 100%;
+}
+
+.form-group-inline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+
+.assign-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  
+  &:focus {
+    outline: none;
+    border-color: #4a6fa5;
+    box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+  }
+}
+
+.inline-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.submit-btn-inline, .cancel-btn-inline {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+}
+
+.submit-btn-inline {
+  background-color: #4a6fa5;
+  color: white;
+  
+  &:hover {
+    background-color: darken(#4a6fa5, 10%);
+  }
+  
+  &:disabled {
+    background-color: #c2c9d6;
+    cursor: not-allowed;
+  }
+}
+
+.cancel-btn-inline {
+  background-color: #f0f0f0;
+  color: #333;
+  
+  &:hover {
+    background-color: darken(#f0f0f0, 5%);
+  }
+}
+
+/* Styles pour le formulaire d'édition */
+.edit-form {
+  width: 100%;
+  padding: 10px 0;
+}
+
+.task-edit-form {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.edit-form .form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.edit-form .half {
+  flex: 1;
+}
+
+.edit-form label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.edit-form input, 
+.edit-form textarea, 
+.edit-form select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  
+  &:focus {
+    border-color: #c67e21;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(198, 126, 33, 0.15);
+  }
+}
+
+.edit-form textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.edit-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.edit-form .submit-btn,
+.edit-form .cancel-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.edit-form .submit-btn {
+  background-color: #c67e21;
+  color: white;
+  border: none;
+  
+  &:hover {
+    background-color: darken(#c67e21, 10%);
+  }
+  
+  &:disabled {
+    background-color: #d9ad6e;
+    cursor: not-allowed;
+  }
+}
+
+.edit-form .cancel-btn {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  color: #333;
+  
+  &:hover {
+    background-color: #e3e3e3;
+  }
+}
+
+/* Styles pour le formulaire d'édition */
+.edit-form {
+  width: 100%;
+  padding: 10px 0;
+}
+
+.task-edit-form {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.edit-form .form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.edit-form .half {
+  flex: 1;
+}
+
+.edit-form label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.edit-form input, 
+.edit-form textarea, 
+.edit-form select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  
+  &:focus {
+    border-color: #c67e21;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(198, 126, 33, 0.15);
+  }
+}
+
+.edit-form textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.edit-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.edit-form .submit-btn,
+.edit-form .cancel-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.edit-form .submit-btn {
+  background-color: #c67e21;
+  color: white;
+  border: none;
+  
+  &:hover {
+    background-color: darken(#c67e21, 10%);
+  }
+  
+  &:disabled {
+    background-color: #d9ad6e;
+    cursor: not-allowed;
+  }
+}
+
+.edit-form .cancel-btn {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  color: #333;
+  
+  &:hover {
+    background-color: #e3e3e3;
+  }
+}
+
+.section-header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -193,44 +678,82 @@
   padding: 20px 0;
 }
 
-/* Style pour le bouton d'assignation */
-.assign-btn {
+/* Cette section a été déplacée et fusionnée avec la définition précédente des boutons */
+
+/* Style pour le formulaire d'assignation intégré */
+.inline-assign-form {
   position: absolute;
   bottom: 10px;
-  right: 10px;
+  left: 10px; /* Changé de right à left pour correspondre aux boutons */
+  width: calc(100% - 40px);
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 4px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+.assign-form-inline {
+  display: flex;
+  width: 100%;
+}
+
+.form-group-inline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+
+.assign-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  
+  &:focus {
+    outline: none;
+    border-color: #4a6fa5;
+    box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+  }
+}
+
+.inline-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.submit-btn-inline, .cancel-btn-inline {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+}
+
+.submit-btn-inline {
   background-color: #4a6fa5;
   color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 10px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  opacity: 0; /* Caché par défaut, visible au survol de la tâche */
   
   &:hover {
     background-color: darken(#4a6fa5, 10%);
   }
   
-  i {
-    margin-right: 4px;
+  &:disabled {
+    background-color: #c2c9d6;
+    cursor: not-allowed;
   }
 }
 
-/* Style pour le formulaire d'assignation */
-.assign-form {
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  padding: 20px;
-  margin-top: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-  h4 {
-    margin-top: 0;
-    margin-bottom: 16px;
-    font-size: 1.1rem;
-    color: #333;
+.cancel-btn-inline {
+  background-color: #f0f0f0;
+  color: #333;
+  
+  &:hover {
+    background-color: darken(#f0f0f0, 5%);
   }
 }
 

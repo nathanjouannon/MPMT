@@ -4,31 +4,13 @@ import { Project } from '../../pages/projects/projects.component';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  status: 'BACKLOG' | 'TODO' | 'IN_PROGRESS' | 'RETRO' | 'DONE';
-  priority: 'VERY_LOW' | 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
-  dueDate?: string;
-  endDate?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  assignments?: {
-    id: number;
-    user: {
-      id: number;
-      username: string;
-      email?: string;
-    }
-  }[];
-}
+import { TaskDrawerComponent } from '../task-drawer/task-drawer.component';
+import { Task } from '../../models/task.model';
 
 @Component({
   selector: 'app-project-drawer-tasks',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule],
+  imports: [CommonModule, DatePipe, FormsModule, TaskDrawerComponent],
   templateUrl: './project-drawer-tasks.component.html',
   styleUrl: './project-drawer-tasks.component.scss'
 })
@@ -38,13 +20,30 @@ export class ProjectDrawerTasksComponent {
 
     private apiUrl = 'http://localhost:8080/api/task';
     private assignUrl = 'http://localhost:8080/api/task/assign';
+    private historyUrl = 'http://localhost:8080/api/task/history';
     showTaskForm = false;
+    
+    // Pour l'affichage des détails d'une tâche
+    selectedTask: Task | null = null;
+    isTaskDrawerOpen = false;
     
     // Pour l'assignation des tâches
     currentAssigningTask: Task | null = null;
     showAssignForm = false;
     assignFormData = {
       userEmailToAssign: ''
+    };
+    
+    // Pour la modification des tâches
+    currentEditingTask: Task | null = null;
+    showEditForm = false;
+    editTaskForm = {
+      title: '',
+      description: '',
+      dueDate: '',
+      endDate: '',
+      priority: '',
+      status: ''
     };
     
     newTask = {
@@ -158,6 +157,24 @@ export class ProjectDrawerTasksComponent {
         }
     }
     
+    openTaskDetails(task: Task) {
+        // TODO: 
+        // - Enlever l'hitorique d'un tache depuis le projet
+        // - Récupérer l'historique complet et les affectations avant d'ouvrir le drawer
+        this.selectedTask = task;
+        this.isTaskDrawerOpen = true;
+    }
+    
+    closeTaskDrawer() {
+        this.isTaskDrawerOpen = false;
+        this.selectedTask = null;
+    }
+    
+    onTaskUpdated() {
+        this.updateProject.emit();
+        // TODO: fix le refresh de la tache dans le drawer
+    }
+    
     // Méthodes pour l'assignation de tâches
     openAssignForm(task: Task) {
         this.currentAssigningTask = task;
@@ -209,6 +226,67 @@ export class ProjectDrawerTasksComponent {
                     this.toastr.error(err.error.message);
                 } else {
                     this.toastr.error('Erreur lors de l\'assignation de la tâche');
+                }
+            }
+        });
+    }
+    
+    // Méthodes pour la modification des tâches
+    openEditForm(task: Task) {
+        this.currentEditingTask = task;
+        this.showEditForm = true;
+        
+        // Initialiser le formulaire avec les valeurs de la tâche
+        this.editTaskForm = {
+            title: task.title || '',
+            description: task.description || '',
+            dueDate: task.dueDate ? task.dueDate.slice(0, 10) : '', // Format YYYY-MM-DD
+            endDate: task.endDate ? task.endDate.slice(0, 10) : '',
+            priority: task.priority || 'MEDIUM',
+            status: task.status || 'BACKLOG'
+        };
+    }
+    
+    cancelEditTask() {
+        this.showEditForm = false;
+        this.currentEditingTask = null;
+    }
+    
+    submitEditTask() {
+        if (!this.currentEditingTask) {
+            console.error('Aucune tâche sélectionnée');
+            return;
+        }
+        
+        const currentUserId = Number(localStorage.getItem('current_userID'));
+        
+        if (!currentUserId) {
+            console.error('Utilisateur non connecté');
+            return;
+        }
+        
+        const payload = {
+            title: this.editTaskForm.title,
+            description: this.editTaskForm.description || null,
+            priority: this.editTaskForm.priority,
+            status: this.editTaskForm.status,
+            dueDate: this.editTaskForm.dueDate || null,
+            userRequestingId: currentUserId
+        };
+        
+        this.http.patch(`${this.apiUrl}/${this.currentEditingTask.id}`, payload).subscribe({
+            next: () => {
+                this.showEditForm = false;
+                this.currentEditingTask = null;
+                this.updateProject.emit();
+                this.toastr.success('Tâche modifiée avec succès');
+            },
+            error: (err) => {
+                console.error('Erreur lors de la modification de la tâche', err);
+                if (err.error && err.error.message) {
+                    this.toastr.error(err.error.message);
+                } else {
+                    this.toastr.error('Erreur lors de la modification de la tâche');
                 }
             }
         });

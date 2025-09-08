@@ -85,50 +85,135 @@
     </div>
     <ng-container *ngIf="project && project.tasks && project.tasks.length > 0">
         <ul>
-            <li *ngFor="let task of project.tasks" class="task-item">
-            <div class="task-header">
-                <span class="task-title">{{ task.title }}</span>
-                <div class="task-indicators">
-                    <span class="task-status" [ngClass]="getTaskStatusClass(task.status)">{{ task.status }}</span>
-                    <span class="task-priority" [ngClass]="getTaskPriorityClass(task.priority)">{{ task.priority }}</span>
+            <li *ngFor="let task of project.tasks" class="task-item" (click)="openTaskDetails(task)">
+                <!-- Vue normale (sans formulaire d'édition) -->
+                <div *ngIf="!(showEditForm && currentEditingTask?.id === task.id)">
+                    <div class="task-header">
+                        <span class="task-title">{{ task.title }}</span>
+                        <div class="task-indicators">
+                            <span class="task-status" [ngClass]="getTaskStatusClass(task.status)">{{ task.status }}</span>
+                            <span class="task-priority" [ngClass]="getTaskPriorityClass(task.priority)">{{ task.priority }}</span>
+                        </div>
+                    </div>
+                    <p class="task-description">{{ task.description }}</p>
+                    <div class="task-details">
+                        <span class="task-due-date" *ngIf="task.dueDate">Échéance: {{ task.dueDate | date: 'dd/MM/yyyy' }}</span>
+                        <span class="task-assignee" *ngIf="task.assignments && task.assignments.length > 0">
+                            Assignée à: {{ task.assignments[0].user.username }}
+                            <span *ngIf="task.assignments.length > 1">(+{{ task.assignments.length - 1 }})</span>
+                        </span>
+                    </div>
+                    
+                    <!-- Boutons d'action -->
+                    <div class="task-actions">
+                        <button *ngIf="!(showAssignForm && currentAssigningTask?.id === task.id)" 
+                                class="assign-btn" 
+                                (click)="$event.stopPropagation(); openAssignForm(task)">
+                            <i class="fa fa-user-plus"></i> Assigner
+                        </button>
+                        
+                        <button class="edit-btn" 
+                                (click)="$event.stopPropagation(); openEditForm(task)">
+                            <i class="fa fa-pencil"></i> Modifier
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <p class="task-description">{{ task.description }}</p>
-            <div class="task-details">
-                <span class="task-due-date" *ngIf="task.dueDate">Échéance: {{ task.dueDate | date: 'dd/MM/yyyy' }}</span>
-                <span class="task-assignee" *ngIf="task.assignments && task.assignments.length > 0">
-                    Assignée à: {{ task.assignments[0].user.username }}
-                    <span *ngIf="task.assignments.length > 1">(+{{ task.assignments.length - 1 }})</span>
-                </span>
-            </div>
-            <button class="assign-btn" (click)="openAssignForm(task)">
-                <i class="fas fa-user-plus"></i> Assigner
-            </button>
-        </li>
+                
+                <!-- Formulaire d'édition -->
+                <div *ngIf="showEditForm && currentEditingTask?.id === task.id" class="edit-form">
+                    <form (ngSubmit)="submitEditTask()" #editForm="ngForm" class="task-edit-form">
+                        <div class="form-group">
+                            <label for="edit-title">Titre*</label>
+                            <input 
+                                type="text" 
+                                id="edit-title" 
+                                name="title" 
+                                [(ngModel)]="editTaskForm.title" 
+                                required 
+                                placeholder="Titre de la tâche"
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit-description">Description</label>
+                            <textarea 
+                                id="edit-description" 
+                                name="description" 
+                                [(ngModel)]="editTaskForm.description" 
+                                placeholder="Description de la tâche"
+                            ></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="edit-dueDate">Date d'échéance</label>
+                                <input 
+                                    type="date" 
+                                    id="edit-dueDate" 
+                                    name="dueDate" 
+                                    [(ngModel)]="editTaskForm.dueDate"
+                                >
+                            </div>
+                            
+                            <div class="form-group half">
+                                <label for="edit-status">Statut</label>
+                                <select 
+                                    id="edit-status" 
+                                    name="status" 
+                                    [(ngModel)]="editTaskForm.status"
+                                >
+                                    <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit-priority">Priorité</label>
+                            <select 
+                                id="edit-priority" 
+                                name="priority" 
+                                [(ngModel)]="editTaskForm.priority"
+                            >
+                                <option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" [disabled]="!editForm.form.valid" class="submit-btn">Modifier</button>
+                            <button type="button" (click)="cancelEditTask()" class="cancel-btn">Annuler</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Formulaire d'assignation intégré dans la tâche -->
+                <div *ngIf="showAssignForm && currentAssigningTask?.id === task.id && !(showEditForm && currentEditingTask?.id === task.id)" class="inline-assign-form">
+                    <form (ngSubmit)="submitAssignTask()" #assignForm="ngForm" class="assign-form-inline">
+                        <div class="form-group-inline">
+                            <input 
+                                type="email" 
+                                name="userEmail" 
+                                [(ngModel)]="assignFormData.userEmailToAssign" 
+                                required 
+                                placeholder="Email de l'utilisateur"
+                                class="assign-input"
+                            >
+                            <div class="inline-buttons">
+                                <button type="submit" [disabled]="!assignForm.form.valid" class="submit-btn-inline">Assigner</button>
+                                <button type="button" (click)="cancelAssignTask()" class="cancel-btn-inline">Annuler</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </li>
         </ul>
     </ng-container>
-    
-    <!-- Formulaire d'assignation de tâche -->
-    <div class="assign-form" *ngIf="showAssignForm && currentAssigningTask">
-        <h4>Assigner la tâche "{{ currentAssigningTask.title }}"</h4>
-        <form (ngSubmit)="submitAssignTask()" #assignForm="ngForm">
-            <div class="form-group">
-                <label for="userEmail">Email de l'utilisateur*</label>
-                <input 
-                    type="email" 
-                    id="userEmail" 
-                    name="userEmail" 
-                    [(ngModel)]="assignFormData.userEmailToAssign" 
-                    required 
-                    placeholder="Entrez l'email de l'utilisateur"
-                >
-            </div>
-            
-            <div class="form-actions">
-                <button type="submit" [disabled]="!assignForm.form.valid" class="submit-btn">Assigner</button>
-                <button type="button" (click)="cancelAssignTask()" class="cancel-btn">Annuler</button>
-            </div>
-        </form>
-    </div>
     <p *ngIf="!project || !project.tasks || project.tasks.length === 0" class="no-tasks">Aucune tâche pour ce projet.</p>
 </div>
+
+<!-- Drawer pour les détails d'une tâche -->
+<app-task-drawer
+    [task]="selectedTask"
+    [isOpen]="isTaskDrawerOpen"
+    (close)="closeTaskDrawer()"
+    (taskUpdated)="onTaskUpdated()"
+></app-task-drawer>
