@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import { LoginPageComponent } from './login-page.component';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Router } from '@angular/router';
@@ -34,21 +34,9 @@ describe('LoginPageComponent', () => {
     setItemSpy = spyOn(localStorage, 'setItem');
     navigateSpy = spyOn(router, 'navigate');
     
-    // Espionner la méthode post de HttpClient
-    httpPostSpy = spyOn(httpClient, 'post').and.callFake(
-      (url: string, body: any, options?: any): any => of({
-        token: 'fake-token',
-        id: '1',
-        username: 'testuser',
-        email: 'test@example.com'
-      })
-    );
+    httpPostSpy = spyOn(httpClient, 'post');
     
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    // Vérifier si tous les spies ont été appelés comme prévu
   });
 
   it('should create', () => {
@@ -91,89 +79,35 @@ describe('LoginPageComponent', () => {
     expect(component.password).toBe('password123');
   });
 
-  // it('should send login request and navigate on successful login', fakeAsync(() => {
-  //   component.email = 'test@example.com';
-  //   component.password = 'password123';
+  it('should submit the form when login button is clicked', () => {
+    const loginSpy = spyOn(component, 'login');
+    const submitButton = fixture.debugElement.query(By.css('button[type="submit"]'));
     
-  //   // Configuration du spy pour renvoyer une réponse réussie
-  //   httpPostSpy.and.returnValue(of({
-  //     token: 'fake-token',
-  //     id: '1',
-  //     username: 'testuser',
-  //     email: 'test@example.com'
-  //   }));
+    submitButton.nativeElement.click();
     
-  //   // Appeler login() pour déclencher la requête HTTP
-  //   component.login();
-  //   tick(); // Faire avancer le temps simulé pour résoudre les observables
-    
-  //   // Vérifier que HttpClient.post a été appelé avec les bons paramètres
-  //   expect(httpPostSpy).toHaveBeenCalledWith(
-  //     'http://localhost:8080/api/auth/login',
-  //     { email: 'test@example.com', password: 'password123' }
-  //   );
-    
-  //   // Vérifier que les méthodes appropriées ont été appelées
-  //   expect(setItemSpy).toHaveBeenCalledWith('token', 'fake-token');
-  //   expect(setItemSpy).toHaveBeenCalledWith('current_userID', '1');
-  //   expect(setItemSpy).toHaveBeenCalledWith('current_userName', 'testuser');
-  //   expect(setItemSpy).toHaveBeenCalledWith('current_userEmail', 'test@example.com');
-  //   expect(navigateSpy).toHaveBeenCalledWith(['/dashboard']);
-  // }));
+    expect(loginSpy).toHaveBeenCalled();
+  });
 
-  // it('should show error message on login failure', fakeAsync(() => {
-  //   component.email = 'test@example.com';
-  //   component.password = 'wrongpassword';
+  it('should display error message when it exists', () => {
+    component.error = 'Test error message';
+    fixture.detectChanges();
     
-  //   // Configuration du spy pour simuler une erreur
-  //   httpPostSpy.and.returnValue(throwError(() => ({
-  //     error: { message: 'Invalid credentials' },
-  //     status: 401,
-  //     statusText: 'Unauthorized'
-  //   })));
-    
-  //   // Appeler login() pour déclencher la requête
-  //   component.login();
-  //   tick(); // Faire avancer le temps simulé
-    
-  //   // Vérifier que HttpClient.post a été appelé avec les bons paramètres
-  //   expect(httpPostSpy).toHaveBeenCalledWith(
-  //     'http://localhost:8080/api/auth/login',
-  //     { email: 'test@example.com', password: 'wrongpassword' }
-  //   );
-    
-  //   fixture.detectChanges();
-    
-  //   expect(component.error).toBe('Invalid credentials');
-  //   const errorElement = fixture.debugElement.query(By.css('.error'));
-  //   expect(errorElement).toBeTruthy();
-  //   expect(errorElement.nativeElement.textContent).toContain('Invalid credentials');
-  // }));
+    const errorElement = fixture.debugElement.query(By.css('.error'));
+    expect(errorElement).toBeTruthy();
+    expect(errorElement.nativeElement.textContent).toBe('Test error message');
+  });
 
-  // it('should use default error message when server error has no message', fakeAsync(() => {
-  //   component.email = 'test@example.com';
-  //   component.password = 'wrongpassword';
+  it('should not display error message when error is empty', () => {
+    component.error = '';
+    fixture.detectChanges();
     
-  //   // Configuration du spy pour simuler une erreur serveur sans message spécifique
-  //   httpPostSpy.and.returnValue(throwError(() => ({
-  //     error: {}, // Pas de message dans l'erreur
-  //     status: 500,
-  //     statusText: 'Server Error'
-  //   })));
-    
-  //   // Appeler login() pour déclencher la requête
-  //   component.login();
-  //   tick(); // Faire avancer le temps simulé
-    
-  //   // Vérifier que HttpClient.post a été appelé avec les bons paramètres
-  //   expect(httpPostSpy).toHaveBeenCalledWith(
-  //     'http://localhost:8080/api/auth/login',
-  //     { email: 'test@example.com', password: 'wrongpassword' }
-  //   );
-    
-  //   fixture.detectChanges();
-    
-  //   // Vérifier que le message d'erreur par défaut est utilisé
-  //   expect(component.error).toBe('Email ou mot de passe incorrect');
-  // }));
+    const errorElement = fixture.debugElement.query(By.css('.error'));
+    expect(errorElement).toBeNull();
+  });
+
+  it('should have a back button linking to home page', () => {
+    const backLink = fixture.debugElement.query(By.css('.back-link'));
+    expect(backLink).toBeTruthy();
+    expect(backLink.attributes['routerLink']).toBe('/');
+  });
 });
