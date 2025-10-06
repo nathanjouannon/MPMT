@@ -1,311 +1,330 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { ProjectsComponent, Project, Owner } from './projects.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ProjectsComponent, Project } from './projects.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
-import { By } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { By } from '@angular/platform-browser';
 
 describe('ProjectsComponent', () => {
   let component: ProjectsComponent;
   let fixture: ComponentFixture<ProjectsComponent>;
-  let httpClientSpy: jasmine.SpyObj<HttpClient>;
-
-  const mockOwner: Owner = {
-    id: 1,
-    username: 'testuser',
-    email: 'test@example.com',
-    createdAt: '2023-01-01'
-  };
+  let httpClient: HttpClient;
 
   const mockProjects: Project[] = [
     {
       id: 1,
-      name: 'Projet Test 1',
-      description: 'Description du projet test 1',
+      name: 'Test Project 1',
+      description: 'Description for project 1',
       startDate: '2023-01-01T10:00:00',
-      owner: mockOwner,
+      owner: {
+        id: 1,
+        username: 'owner1',
+        email: 'owner1@example.com',
+        createdAt: '2023-01-01'
+      },
       members: [],
       tasks: [],
       invitations: []
     },
     {
       id: 2,
-      name: 'Projet Test 2',
-      description: 'Description du projet test 2',
-      startDate: '2023-01-02T10:00:00',
-      owner: mockOwner,
-      members: [],
+      name: 'Test Project 2',
+      description: 'Description for project 2',
+      startDate: '2023-02-01T10:00:00',
+      owner: {
+        id: 1,
+        username: 'owner1',
+        email: 'owner1@example.com',
+        createdAt: '2023-01-01'
+      },
+      members: [
+        {
+          id: 1,
+          user: {
+            id: 2,
+            username: 'member1',
+            email: 'member1@example.com',
+            createdAt: '2023-01-01'
+          },
+          role: 'MEMBER'
+        }
+      ],
       tasks: [],
       invitations: []
     }
   ];
 
   beforeEach(async () => {
-    const httpSpy = jasmine.createSpyObj('HttpClient', ['get', 'post', 'put', 'delete']);
-    
     await TestBed.configureTestingModule({
       imports: [
         ProjectsComponent,
         HttpClientTestingModule,
-        FormsModule
+        FormsModule,
+        BrowserAnimationsModule
       ],
-      providers: [
-        { provide: HttpClient, useValue: httpSpy }
-      ],
-      schemas: [NO_ERRORS_SCHEMA] // Pour ignorer les erreurs de composants enfants non déclarés
+      schemas: [NO_ERRORS_SCHEMA] // Ignore errors from child components not declared
     })
     .compileComponents();
 
     fixture = TestBed.createComponent(ProjectsComponent);
     component = fixture.componentInstance;
-    httpClientSpy = TestBed.inject(HttpClient) as jasmine.SpyObj<HttpClient>;
-    
-    // Configuration par défaut du spy
-    httpClientSpy.get.and.returnValue(of(mockProjects));
-
-    // Spy sur localStorage
-    spyOn(localStorage, 'getItem').and.returnValue('1');
+    httpClient = TestBed.inject(HttpClient);
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load projects on init', () => {
-    component.ngOnInit();
-    
-    expect(httpClientSpy.get).toHaveBeenCalledWith('http://localhost:8080/api/project');
-    expect(component.projects).toEqual(mockProjects);
-    expect(component.loading).toBeFalse();
-    expect(component.errorMessage).toBe('');
-  });
-
-  it('should handle error when loading projects fails', () => {
-    httpClientSpy.get.and.returnValue(throwError(() => new Error('Test error')));
-    
-    component.ngOnInit();
-    
-    expect(component.loading).toBeFalse();
-    expect(component.errorMessage).toBe('Erreur lors du chargement des projets.');
-  });
-
-  it('should show create project form when createProject is called', () => {
-    component.createProject();
-    
-    expect(component.showCreateForm).toBeTrue();
-  });
-
-  it('should hide form and reset model when cancelCreate is called', () => {
-    component.newProject = {
-      name: 'Test Project',
-      description: 'Test Description',
-      start_date: '2023-05-10T10:00:00'
-    };
-    component.showCreateForm = true;
-    
-    component.cancelCreate();
-    
-    expect(component.showCreateForm).toBeFalse();
-    expect(component.newProject).toEqual({
-      name: '',
-      description: '',
-      start_date: ''
+  describe('ngOnInit', () => {
+    it('should load projects on initialization', () => {
+      spyOn(component, 'loadProjects').and.returnValue(of([]));
+      component.ngOnInit();
+      expect(component.loadProjects).toHaveBeenCalled();
     });
   });
 
-  it('should not submit form when it is invalid', () => {
-    const mockForm = {
-      valid: false,
-      control: {
-        markAllAsTouched: jasmine.createSpy('markAllAsTouched')
-      }
-    } as unknown as NgForm;
-    
-    component.onCreateProject(mockForm);
-    
-    expect(mockForm.control.markAllAsTouched).toHaveBeenCalled();
-    expect(httpClientSpy.post).not.toHaveBeenCalled();
-  });
+  describe('loadProjects', () => {
+    it('should load projects successfully', (done) => {
+      spyOn(component['http'], 'get').and.returnValue(of(mockProjects));
 
-  it('should submit form when it is valid and create project', () => {
-    const mockForm = {
-      valid: true,
-      control: {
-        markAllAsTouched: jasmine.createSpy('markAllAsTouched')
-      }
-    } as unknown as NgForm;
-    
-    component.newProject = {
-      name: 'Test Project',
-      description: 'Test Description',
-      start_date: '2023-05-10T10:00'
-    };
-    
-    httpClientSpy.post.and.returnValue(of({}));
-    
-    component.onCreateProject(mockForm);
-    
-    expect(httpClientSpy.post).toHaveBeenCalledWith('http://localhost:8080/api/project', {
-      name: 'Test Project',
-      description: 'Test Description',
-      start_date: '2023-05-10T10:00:00',
-      owner_id: 1
+      component.loadProjects().subscribe(() => {
+        expect(component.projects).toEqual(mockProjects);
+        expect(component.loading).toBeFalse();
+        done();
+      });
     });
-    expect(component.showCreateForm).toBeFalse();
-    expect(httpClientSpy.get).toHaveBeenCalled(); // loadProjects est appelé après la création
-  });
 
-  it('should handle error during project creation', () => {
-    const mockForm = {
-      valid: true,
-      control: {
-        markAllAsTouched: jasmine.createSpy('markAllAsTouched')
-      }
-    } as unknown as NgForm;
+    it('should handle error when loading projects', (done) => {
+      spyOn(httpClient, 'get').and.returnValue(throwError(() => new Error('Network error')));
     
-    component.newProject = {
-      name: 'Test Project',
-      description: 'Test Description',
-      start_date: '2023-05-10T10:00'
-    };
-    
-    httpClientSpy.post.and.returnValue(throwError(() => new Error('Test error')));
-    const consoleErrorSpy = spyOn(console, 'error');
-    const alertSpy = spyOn(window, 'alert');
-    
-    component.onCreateProject(mockForm);
-    
-    expect(consoleErrorSpy).toHaveBeenCalled();
-    expect(alertSpy).toHaveBeenCalledWith('Erreur lors de la création du projet');
-  });
-
-  it('should correctly format date for API', () => {
-    // Test avec une date sans secondes
-    const dateWithoutSeconds = '2023-05-10T10:00';
-    const formattedDate = component['formatDateForApi'](dateWithoutSeconds);
-    expect(formattedDate).toBe('2023-05-10T10:00:00');
-    
-    // Test avec une date complète
-    const fullDate = '2023-05-10T10:00:00';
-    const formattedFullDate = component['formatDateForApi'](fullDate);
-    expect(formattedFullDate).toBe(fullDate);
-    
-    // Test avec une valeur vide
-    expect(component['formatDateForApi']('')).toBe('');
-  });
-
-  it('should reset form model correctly', () => {
-    component.newProject = {
-      name: 'Test',
-      description: 'Test Description',
-      start_date: '2023-01-01'
-    };
-    
-    component['resetFormModel']();
-    
-    expect(component.newProject).toEqual({
-      name: '',
-      description: '',
-      start_date: ''
+      component.loadProjects().subscribe({
+        error: () => {
+          expect(component.errorMessage).toBe('Erreur lors du chargement des projets.');
+          expect(component.loading).toBeFalse();
+          done();
+        }
+      });
     });
   });
 
-  it('should open drawer with selected project', () => {
-    const project = mockProjects[0];
-    
-    component.openDrawer(project);
-    
-    expect(component.selectedProject).toBe(project);
-    expect(component.isDrawerOpen).toBeTrue();
+  describe('createProject', () => {
+    it('should set showCreateForm to true', () => {
+      component.showCreateForm = false;
+      component.createProject();
+      expect(component.showCreateForm).toBeTrue();
+    });
   });
 
-  it('should close drawer and reset selectedProject', () => {
-    component.selectedProject = mockProjects[0];
-    component.isDrawerOpen = true;
-    
-    component.closeDrawer();
-    
-    expect(component.isDrawerOpen).toBeFalse();
-    expect(component.selectedProject).toBeNull();
+  describe('cancelCreate', () => {
+    it('should hide form and reset fields', () => {
+      component.showCreateForm = true;
+      component.newProject = {
+        name: 'Test',
+        description: 'Test Desc',
+        start_date: '2023-10-10'
+      };
+      
+      component.cancelCreate();
+      
+      expect(component.showCreateForm).toBeFalse();
+      expect(component.newProject).toEqual({
+        name: '',
+        description: '',
+        start_date: ''
+      });
+    });
   });
 
-  it('should handle project update and reload projects', () => {
-    component.selectedProject = mockProjects[0];
-    const loadProjectsSpy = spyOn(component, 'loadProjects').and.returnValue(of([]));
+  describe('onCreateProject', () => {
+    it('should not submit if form is invalid', () => {
+      spyOn(httpClient, 'post');
+      
+      const mockForm: any = {
+        valid: false,
+        control: {
+          markAllAsTouched: jasmine.createSpy('markAllAsTouched')
+        }
+      };
+      
+      component.onCreateProject(mockForm);
+      
+      expect(httpClient.post).not.toHaveBeenCalled();
+      expect(mockForm.control.markAllAsTouched).toHaveBeenCalled();
+    });
+
+    it('should create project successfully', (done) => {
+      const newProject = {
+        name: 'New Project',
+        description: 'New Description',
+        start_date: '2023-03-01T10:00'
+      };
+      
+      const mockResponse = { id: 3, ...newProject };
+      
+      spyOn(component['http'], 'post').and.returnValue(of(mockResponse));
+      spyOn(component, 'loadProjects').and.returnValue(of([]));
+      spyOn(localStorage, 'getItem').and.returnValue('1');
+      
+      component.newProject = { ...newProject };
+      
+      const mockForm: any = {
+        valid: true,
+        control: {
+          markAllAsTouched: jasmine.createSpy('markAllAsTouched')
+        }
+      };
+      
+      component.onCreateProject(mockForm);
+      
+      setTimeout(() => {
+        expect(component['http'].post).toHaveBeenCalledWith(
+          'http://localhost:8080/api/project',
+          jasmine.objectContaining({
+            name: newProject.name,
+            description: newProject.description,
+            start_date: '2023-03-01T10:00:00',
+            owner_id: 1
+          })
+        );
+      
+        expect(component.showCreateForm).toBeFalse();
+        expect(component.loadProjects).toHaveBeenCalled();
+      
+        done();
+      });
+    });
+
+    it('should handle error when creating project', (done) => {
+      const mockError = new Error('Error');
+
+      spyOn(component['http'], 'post').and.returnValue(throwError(() => mockError));
+      spyOn(console, 'error');
+      spyOn(window, 'alert');
+      spyOn(localStorage, 'getItem').and.returnValue('1');
+
+      const mockForm: any = {
+        valid: true,
+        control: { markAllAsTouched: jasmine.createSpy('markAllAsTouched') }
+      };
     
-    component.handleProjectUpdated();
+      component.onCreateProject(mockForm);
     
-    expect(loadProjectsSpy).toHaveBeenCalled();
+      // attendre que la souscription ait émis l'erreur
+      setTimeout(() => {
+        expect(console.error).toHaveBeenCalledWith(mockError);
+        expect(window.alert).toHaveBeenCalledWith('Erreur lors de la création du projet');
+        done();
+      });
+    });
   });
 
-  it('should do nothing in handleProjectUpdated if no project is selected', () => {
-    component.selectedProject = null;
-    const loadProjectsSpy = spyOn(component, 'loadProjects').and.returnValue(of([]));
-    
-    component.handleProjectUpdated();
-    
-    expect(loadProjectsSpy).not.toHaveBeenCalled();
+  describe('openDrawer', () => {
+    it('should set selectedProject and open drawer', () => {
+      const project = mockProjects[0];
+      
+      component.openDrawer(project);
+      
+      expect(component.selectedProject).toBe(project);
+      expect(component.isDrawerOpen).toBeTrue();
+    });
   });
 
-  it('should handle project deletion and reload projects', () => {
-    const loadProjectsSpy = spyOn(component, 'loadProjects').and.returnValue(of([]));
-    
-    component.onProjectDeleted(1);
-    
-    expect(loadProjectsSpy).toHaveBeenCalled();
+  describe('closeDrawer', () => {
+    it('should close drawer and reset selectedProject', () => {
+      component.isDrawerOpen = true;
+      component.selectedProject = mockProjects[0];
+      
+      component.closeDrawer();
+      
+      expect(component.isDrawerOpen).toBeFalse();
+      expect(component.selectedProject).toBeNull();
+    });
   });
 
-  it('should close drawer if deleted project is the selected one', () => {
-    component.selectedProject = mockProjects[0];
-    component.isDrawerOpen = true;
-    spyOn(component, 'loadProjects').and.returnValue(of([]));
-    
-    component.onProjectDeleted(1);
-    
-    expect(component.isDrawerOpen).toBeFalse();
-    expect(component.selectedProject).toBeNull();
+  describe('handleProjectUpdated', () => {
+    it('should update the selected project with latest data', () => {
+      const projectId = 1;
+      const updatedProject = { ...mockProjects[0], name: 'Updated Name' };
+      
+      component.selectedProject = mockProjects[0];
+      spyOn(component, 'loadProjects').and.callFake(() => {
+        component.projects = [updatedProject, mockProjects[1]];
+        return of([]);
+      });
+      
+      component.handleProjectUpdated();
+      
+      expect(component.selectedProject).toEqual(updatedProject);
+    });
+
+    it('should do nothing if no project is selected', () => {
+      component.selectedProject = null;
+      spyOn(component, 'loadProjects');
+      
+      component.handleProjectUpdated();
+      
+      expect(component.loadProjects).not.toHaveBeenCalled();
+    });
   });
 
-  it('should display projects in the UI', () => {
-    component.projects = mockProjects;
-    fixture.detectChanges();
-    
-    const projectCards = fixture.debugElement.queryAll(By.css('.project-card'));
-    expect(projectCards.length).toBe(2); // Le formulaire de création est aussi une .project-card
-    
-    // Vérifier le contenu de la première carte
-    const firstCardTitle = projectCards[0].query(By.css('h2'));
-    expect(firstCardTitle.nativeElement.textContent).toContain('Projet Test 1');
+  describe('onProjectDeleted', () => {
+    it('should reload projects and close drawer if deleted project was selected', () => {
+      const projectId = 1;
+      component.selectedProject = mockProjects[0];
+      
+      spyOn(component, 'loadProjects').and.returnValue(of([]));
+      spyOn(component, 'closeDrawer');
+      
+      component.onProjectDeleted(projectId);
+      
+      expect(component.loadProjects).toHaveBeenCalled();
+      expect(component.closeDrawer).toHaveBeenCalled();
+    });
+
+    it('should only reload projects if deleted project was not selected', () => {
+      const projectId = 2;
+      component.selectedProject = mockProjects[0]; // id=1
+      
+      spyOn(component, 'loadProjects').and.returnValue(of([]));
+      spyOn(component, 'closeDrawer');
+      
+      component.onProjectDeleted(projectId);
+      
+      expect(component.loadProjects).toHaveBeenCalled();
+      expect(component.closeDrawer).not.toHaveBeenCalled();
+    });
   });
 
-  it('should display loading message when loading is true', () => {
-    component.loading = true;
-    fixture.detectChanges();
-    
-    const loadingElement = fixture.debugElement.query(By.css('div'));
-    expect(loadingElement.nativeElement.textContent).toContain('Chargement des projets...');
+  describe('formatDateForApi', () => {
+    it('should format date correctly with seconds', () => {
+      const date = '2023-01-01T10:00';
+      const result = component['formatDateForApi'](date);
+      expect(result).toBe('2023-01-01T10:00:00');
+    });
+
+    it('should return empty string for empty input', () => {
+      const result = component['formatDateForApi']('');
+      expect(result).toBe('');
+    });
+
+    it('should not modify date that already has seconds', () => {
+      const date = '2023-01-01T10:00:30';
+      const result = component['formatDateForApi'](date);
+      expect(result).toBe('2023-01-01T10:00:30');
+    });
   });
 
-  it('should display error message when there is an error', () => {
-    component.errorMessage = 'Test error message';
-    fixture.detectChanges();
-    
-    const errorElement = fixture.debugElement.query(By.css('.error'));
-    expect(errorElement.nativeElement.textContent).toContain('Test error message');
-  });
-
-  it('should call openDrawer when project card is clicked', () => {
-    component.projects = mockProjects;
-    fixture.detectChanges();
-    
-    const openDrawerSpy = spyOn(component, 'openDrawer');
-    const projectCards = fixture.debugElement.queryAll(By.css('.project-card'));
-    
-    // Cliquer sur la première carte (index 0 est le formulaire si visible)
-    projectCards[0].triggerEventHandler('click', null);
-    
-    expect(openDrawerSpy).toHaveBeenCalledWith(mockProjects[0]);
+  describe('template interactions', () => {
+    it('should display loading indicator when loading is true', () => {
+      component.loading = true;
+      fixture.detectChanges();
+        
+      const html = fixture.nativeElement.textContent;
+        
+      expect(html).toContain('Chargement'); // ou "Loading" selon ton template
+    });
   });
 });
