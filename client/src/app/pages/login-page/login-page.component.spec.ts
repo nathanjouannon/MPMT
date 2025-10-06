@@ -11,15 +11,8 @@ describe('LoginPageComponent', () => {
   let component: LoginPageComponent;
   let fixture: ComponentFixture<LoginPageComponent>;
   let router: Router;
-  let localStorageSpy: jasmine.SpyObj<Storage>;
 
   beforeEach(async () => {
-    localStorageSpy = jasmine.createSpyObj('Storage', ['setItem']);
-    
-    Object.defineProperty(window, 'localStorage', {
-      value: localStorageSpy
-    });
-
     await TestBed.configureTestingModule({
       imports: [
         LoginPageComponent,
@@ -33,6 +26,9 @@ describe('LoginPageComponent', () => {
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
     fixture.detectChanges();
+
+    // Mock localStorage
+    spyOn(localStorage, 'getItem').and.returnValue('1');
   });
 
   it('should create', () => {
@@ -57,6 +53,7 @@ describe('LoginPageComponent', () => {
       // Configurer les espions avant d'appeler la méthode testée
       spyOn(component['http'], 'post').and.returnValue(of(mockResponse));
       spyOn(router, 'navigate');
+      spyOn(localStorage, 'setItem');
 
       // Définir les valeurs dans le composant
       component.email = mockCredentials.email;
@@ -72,10 +69,10 @@ describe('LoginPageComponent', () => {
       );
 
       // Vérifier que les données ont été stockées dans localStorage
-      expect(localStorageSpy.setItem).toHaveBeenCalledWith('token', mockResponse.token);
-      expect(localStorageSpy.setItem).toHaveBeenCalledWith('current_userID', mockResponse.id);
-      expect(localStorageSpy.setItem).toHaveBeenCalledWith('current_userName', mockResponse.username);
-      expect(localStorageSpy.setItem).toHaveBeenCalledWith('current_userEmail', mockResponse.email);
+      expect(localStorage.setItem).toHaveBeenCalledWith('token', mockResponse.token);
+      expect(localStorage.setItem).toHaveBeenCalledWith('current_userID', mockResponse.id);
+      expect(localStorage.setItem).toHaveBeenCalledWith('current_userName', mockResponse.username);
+      expect(localStorage.setItem).toHaveBeenCalledWith('current_userEmail', mockResponse.email);
 
       // Vérifier que la navigation a été effectuée
       expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);

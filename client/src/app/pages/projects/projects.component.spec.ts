@@ -140,7 +140,7 @@ describe('ProjectsComponent', () => {
 
   describe('onCreateProject', () => {
     it('should not submit if form is invalid', () => {
-      spyOn(httpClient, 'post');
+      spyOn(component['http'], 'post');
       
       const mockForm: any = {
         valid: false,
@@ -150,8 +150,8 @@ describe('ProjectsComponent', () => {
       };
       
       component.onCreateProject(mockForm);
-      
-      expect(httpClient.post).not.toHaveBeenCalled();
+
+      expect(component['http'].post).not.toHaveBeenCalled();
       expect(mockForm.control.markAllAsTouched).toHaveBeenCalled();
     });
 
