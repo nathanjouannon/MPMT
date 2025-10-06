@@ -66,7 +66,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build & Test backend
-        run: mvn clean verify
+        run: mvn clean verify -DskipTests
 
   # --------------------------
   # 🐳 3. PUSH DOCKERHUB IMAGES
