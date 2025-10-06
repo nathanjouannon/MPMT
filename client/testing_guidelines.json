@@ -25,8 +25,8 @@
     },
     "spies": {
       "httpClient": {
-        "mock_success": "spyOn(httpClient, 'get'|'post').and.returnValue(of(mockData));",
-        "mock_error": "spyOn(httpClient, 'get'|'post').and.returnValue(throwError(() => new Error('Erreur')));"
+        "mock_success": "spyOn(component['http'] 'get'|'post').and.returnValue(of(mockData));",
+        "mock_error": "spyOn(component['http'], 'get'|'post').and.returnValue(throwError(() => new Error('Erreur')));"
       },
       "localStorage": "Toujours mocker localStorage.getItem avec spyOn(localStorage, 'getItem').and.returnValue('1');",
       "component_methods": "Si la méthode testée appelle une autre méthode, la spy avec spyOn(component, 'methodName').and.returnValue(of([]));"
@@ -50,12 +50,12 @@
           "  const mockForm = { valid: true, control: { markAllAsTouched: () => {} } };",
           "  const mockResponse = { id: 3, name: 'Test', description: 'desc', start_date: '2023-03-01T10:00:00', owner_id: 1 };",
           "  spyOn(localStorage, 'getItem').and.returnValue('1');",
-          "  spyOn(httpClient, 'post').and.returnValue(of(mockResponse));",
+          "  spyOn(component['http'], 'post').and.returnValue(of(mockResponse));",
           "  spyOn(component, 'loadProjects').and.returnValue(of([]));",
           "  component.newProject = { name: 'Test', description: 'desc', start_date: '2023-03-01T10:00' };",
           "  component.onCreateProject(mockForm);",
           "  setTimeout(() => {",
-          "    expect(httpClient.post).toHaveBeenCalledWith(",
+          "    expect(component['http'].post).toHaveBeenCalledWith(",
           "      'http://localhost:8080/api/project',",
           "      jasmine.objectContaining({ name: 'Test', description: 'desc', owner_id: 1 })",
           "    );",
