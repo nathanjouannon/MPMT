@@ -1,7 +1,7 @@
 # MPMT
 Outis de gestion de projet et de taches
 
-## CLient 
+## Client 
 ### techno
 - typeScript
 - Angular
@@ -10,15 +10,16 @@ Outis de gestion de projet et de taches
 ### Local start
 
 First install angular cli
-bash ```
+```
 npm i -g @angular/cli
 ```
+
 Then install dependency
-bash ```
+bash```
 npm i
 ```
 And start the server
-```
+bash```
 ng serve
 ```
 disponible at 'localhost:4200'
