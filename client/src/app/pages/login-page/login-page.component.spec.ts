@@ -1,23 +1,25 @@
-import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LoginPageComponent } from './login-page.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Router } from '@angular/router';
-import { By } from '@angular/platform-browser';
-import { HttpClient } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
+import { By } from '@angular/platform-browser';
 
 describe('LoginPageComponent', () => {
   let component: LoginPageComponent;
   let fixture: ComponentFixture<LoginPageComponent>;
-  let httpClient: HttpClient;
   let router: Router;
-  let setItemSpy: jasmine.Spy;
-  let navigateSpy: jasmine.Spy;
-  let httpPostSpy: jasmine.Spy;
+  let localStorageSpy: jasmine.SpyObj<Storage>;
 
   beforeEach(async () => {
+    localStorageSpy = jasmine.createSpyObj('Storage', ['setItem']);
+    
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageSpy
+    });
+
     await TestBed.configureTestingModule({
       imports: [
         LoginPageComponent,
@@ -29,13 +31,7 @@ describe('LoginPageComponent', () => {
 
     fixture = TestBed.createComponent(LoginPageComponent);
     component = fixture.componentInstance;
-    httpClient = TestBed.inject(HttpClient);
     router = TestBed.inject(Router);
-    setItemSpy = spyOn(localStorage, 'setItem');
-    navigateSpy = spyOn(router, 'navigate');
-    
-    httpPostSpy = spyOn(httpClient, 'post');
-    
     fixture.detectChanges();
   });
 
@@ -43,71 +39,131 @@ describe('LoginPageComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with empty form fields', () => {
-    expect(component.email).toBe('');
-    expect(component.password).toBe('');
-    expect(component.error).toBe('');
+  describe('login', () => {
+    it('should call API with email and password and navigate to dashboard on success', () => {
+      // Préparer les données de test
+      const mockCredentials = {
+        email: 'test@example.com',
+        password: 'password123'
+      };
+
+      const mockResponse = {
+        token: 'fake-jwt-token',
+        id: '1',
+        username: 'testuser',
+        email: 'test@example.com'
+      };
+
+      // Configurer les espions avant d'appeler la méthode testée
+      spyOn(component['http'], 'post').and.returnValue(of(mockResponse));
+      spyOn(router, 'navigate');
+
+      // Définir les valeurs dans le composant
+      component.email = mockCredentials.email;
+      component.password = mockCredentials.password;
+
+      // Appeler la méthode à tester
+      component.login();
+
+      // Vérifier que la requête HTTP a été appelée avec les bonnes données
+      expect(component['http'].post).toHaveBeenCalledWith(
+        'http://localhost:8080/api/auth/login',
+        mockCredentials
+      );
+
+      // Vérifier que les données ont été stockées dans localStorage
+      expect(localStorageSpy.setItem).toHaveBeenCalledWith('token', mockResponse.token);
+      expect(localStorageSpy.setItem).toHaveBeenCalledWith('current_userID', mockResponse.id);
+      expect(localStorageSpy.setItem).toHaveBeenCalledWith('current_userName', mockResponse.username);
+      expect(localStorageSpy.setItem).toHaveBeenCalledWith('current_userEmail', mockResponse.email);
+
+      // Vérifier que la navigation a été effectuée
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+    });
+
+    it('should set error message when API returns an error with message', () => {
+      // Préparer la réponse d'erreur
+      const errorResponse = {
+        error: {
+          message: 'Identifiants invalides'
+        }
+      };
+
+      // Configurer l'espion pour simuler une erreur
+      spyOn(component['http'], 'post').and.returnValue(throwError(() => errorResponse));
+
+      // Appeler la méthode à tester
+      component.login();
+
+      // Vérifier que le message d'erreur est défini
+      expect(component.error).toBe('Identifiants invalides');
+
+      // Vérifier que le message d'erreur apparaît dans le DOM
+      fixture.detectChanges(); // Mettre à jour le DOM après la modification
+      const errorElement = fixture.debugElement.query(By.css('.error'));
+      expect(errorElement).toBeTruthy();
+      expect(errorElement.nativeElement.textContent).toContain('Identifiants invalides');
+    });
+
+    it('should set default error message when API returns an error without message', () => {
+      // Préparer la réponse d'erreur sans message spécifique
+      const errorResponse = {
+        error: {}
+      };
+
+      // Configurer l'espion pour simuler une erreur
+      spyOn(component['http'], 'post').and.returnValue(throwError(() => errorResponse));
+
+      // Appeler la méthode à tester
+      component.login();
+
+      // Vérifier que le message d'erreur par défaut est défini
+      expect(component.error).toBe('Email ou mot de passe incorrect');
+    });
   });
 
-  it('should have required form elements', () => {
-    const emailInput = fixture.debugElement.query(By.css('input[type="email"]'));
-    const passwordInput = fixture.debugElement.query(By.css('input[type="password"]'));
-    const submitButton = fixture.debugElement.query(By.css('button[type="submit"]'));
-    const registerLink = fixture.debugElement.query(By.css('a[routerLink="/register"]'));
-    
-    expect(emailInput).toBeTruthy();
-    expect(passwordInput).toBeTruthy();
-    expect(submitButton).toBeTruthy();
-    expect(registerLink).toBeTruthy();
-    expect(submitButton.nativeElement.textContent).toContain('Se connecter');
-    expect(registerLink.nativeElement.textContent).toContain('Pas encore de compte ?');
+  describe('form submission', () => {
+    it('should call login method when form is submitted', () => {
+      // Configurer l'espion sur la méthode login
+      spyOn(component, 'login');
+
+      // Simuler la soumission du formulaire
+      const form = fixture.debugElement.query(By.css('form'));
+      form.triggerEventHandler('ngSubmit', null);
+
+      // Vérifier que la méthode login a été appelée
+      expect(component.login).toHaveBeenCalled();
+    });
   });
 
-  it('should update form values on input change', () => {
-    const emailInput = fixture.debugElement.query(By.css('input[type="email"]')).nativeElement;
-    const passwordInput = fixture.debugElement.query(By.css('input[type="password"]')).nativeElement;
-    
-    emailInput.value = 'test@example.com';
-    emailInput.dispatchEvent(new Event('input'));
-    
-    passwordInput.value = 'password123';
-    passwordInput.dispatchEvent(new Event('input'));
-    
-    fixture.detectChanges();
-    
-    expect(component.email).toBe('test@example.com');
-    expect(component.password).toBe('password123');
-  });
+  describe('template interactions', () => {
+    it('should update component properties when form inputs change', () => {
+      // Obtenir les éléments d'entrée du formulaire
+      const emailInput = fixture.debugElement.query(By.css('input[name="email"]')).nativeElement;
+      const passwordInput = fixture.debugElement.query(By.css('input[name="password"]')).nativeElement;
 
-  it('should submit the form when login button is clicked', () => {
-    const loginSpy = spyOn(component, 'login');
-    const submitButton = fixture.debugElement.query(By.css('button[type="submit"]'));
-    
-    submitButton.nativeElement.click();
-    
-    expect(loginSpy).toHaveBeenCalled();
-  });
+      // Simuler les changements d'entrée
+      emailInput.value = 'new@example.com';
+      emailInput.dispatchEvent(new Event('input'));
+      
+      passwordInput.value = 'newpassword';
+      passwordInput.dispatchEvent(new Event('input'));
 
-  it('should display error message when it exists', () => {
-    component.error = 'Test error message';
-    fixture.detectChanges();
-    
-    const errorElement = fixture.debugElement.query(By.css('.error'));
-    expect(errorElement).toBeTruthy();
-    expect(errorElement.nativeElement.textContent).toBe('Test error message');
-  });
+      // Vérifier que les propriétés du composant sont mises à jour
+      expect(component.email).toBe('new@example.com');
+      expect(component.password).toBe('newpassword');
+    });
 
-  it('should not display error message when error is empty', () => {
-    component.error = '';
-    fixture.detectChanges();
-    
-    const errorElement = fixture.debugElement.query(By.css('.error'));
-    expect(errorElement).toBeNull();
-  });
+    it('should display back link to homepage', () => {
+      const backLink = fixture.debugElement.query(By.css('.back-link'));
+      expect(backLink).toBeTruthy();
+      expect(backLink.attributes['routerLink']).toBe('/');
+    });
 
-  it('should have a back button linking to home page', () => {
-    const backLink = fixture.debugElement.query(By.css('.back-link'));
-    expect(backLink).toBeTruthy();
-    expect(backLink.attributes['routerLink']).toBe('/');
+    it('should display register link', () => {
+      const registerLink = fixture.debugElement.query(By.css('.btn-outline'));
+      expect(registerLink).toBeTruthy();
+      expect(registerLink.attributes['routerLink']).toBe('/register');
+    });
   });
 });
