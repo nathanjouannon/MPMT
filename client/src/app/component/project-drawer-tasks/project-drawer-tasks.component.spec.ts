@@ -69,9 +69,6 @@ describe('ProjectDrawerTasksComponent', () => {
     component.project = mockProject;
     httpClient = TestBed.inject(HttpClient);
     
-    // Mock localStorage
-    spyOn(localStorage, 'getItem').and.returnValue('1');
-    
     fixture.detectChanges();
   });
 
@@ -222,7 +219,7 @@ describe('ProjectDrawerTasksComponent', () => {
     component.showAssignForm = true;
     component.assignFormData.userEmailToAssign = 'test@example.com';
     
-    const httpSpy = spyOn(httpClient, 'post').and.returnValue(of({}));
+    const httpSpy = spyOn(component['http'], 'post').and.returnValue(of({}));
     const updateProjectSpy = spyOn(component.updateProject, 'emit');
     
     component.submitAssignTask();
