@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "name": "Angular Testing Guidelines",
+    "version": "1.0.0",
+    "framework": "Angular",
+    "test_runner": "Jasmine + Karma",
+    "purpose": "Définir les bonnes pratiques de génération de tests unitaires et d’intégration Angular pour éviter les erreurs courantes liées à l’asynchronie, au DOM et aux mocks."
+  },
+  "rules": {
+    "structure": {
+      "describe_blocks": "Chaque bloc 'describe' doit isoler une méthode (ex: loadProjects, onCreateProject).",
+      "beforeEach": "Recréer le composant et les dépendances avant chaque test avec TestBed.",
+      "spy_order": "Créer les espions (spyOn) avant l’appel à la méthode testée."
+    },
+    "async": {
+      "handling": "Utiliser done() ou fakeAsync() + tick() pour les méthodes asynchrones.",
+      "subscribe_effects": "Vérifier les effets de bord si la méthode fait un subscribe() interne.",
+      "done_required": "Toujours appeler done() à la fin d’un test asynchrone."
+    },
+    "dom": {
+      "invalid_selectors": "Interdire :contains(), :eq(), :visible() et tout sélecteur non standard.",
+      "text_check": "Utiliser fixture.nativeElement.textContent pour vérifier du texte.",
+      "data_testid": "Utiliser des attributs [data-testid] pour cibler des éléments dans le DOM.",
+      "detect_changes": "Toujours appeler fixture.detectChanges() après modification du composant."
+    },
+    "spies": {
+      "httpClient": {
+        "mock_success": "spyOn(httpClient, 'get'|'post').and.returnValue(of(mockData));",
+        "mock_error": "spyOn(httpClient, 'get'|'post').and.returnValue(throwError(() => new Error('Erreur')));"
+      },
+      "localStorage": "Toujours mocker localStorage.getItem avec spyOn(localStorage, 'getItem').and.returnValue('1');",
+      "component_methods": "Si la méthode testée appelle une autre méthode, la spy avec spyOn(component, 'methodName').and.returnValue(of([]));"
+    },
+    "error_handling": {
+      "mock_console_alert": "Toujours mocker console.error et window.alert avant de tester les erreurs.",
+      "async_error_test": "Utiliser setTimeout() ou fakeAsync() pour vérifier les effets asynchrones d’erreurs."
+    },
+    "consistency": {
+      "text_check": "Utiliser .textContent au lieu de sélecteurs textuels.",
+      "presence_check": "Utiliser [data-testid] pour vérifier la présence d’un élément.",
+      "http_mock": "Mocker httpClient avant tout subscribe().",
+      "localStorage": "Mocker localStorage systématiquement.",
+      "fixture_updates": "Toujours appeler fixture.detectChanges() après mise à jour du composant."
+    },
+    "examples": {
+      "create_project_success": {
+        "description": "Test conforme pour onCreateProject() avec succès",
+        "code": [
+          "it('should create project successfully', (done) => {",
+          "  const mockForm = { valid: true, control: { markAllAsTouched: () => {} } };",
+          "  const mockResponse = { id: 3, name: 'Test', description: 'desc', start_date: '2023-03-01T10:00:00', owner_id: 1 };",
+          "  spyOn(localStorage, 'getItem').and.returnValue('1');",
+          "  spyOn(httpClient, 'post').and.returnValue(of(mockResponse));",
+          "  spyOn(component, 'loadProjects').and.returnValue(of([]));",
+          "  component.newProject = { name: 'Test', description: 'desc', start_date: '2023-03-01T10:00' };",
+          "  component.onCreateProject(mockForm);",
+          "  setTimeout(() => {",
+          "    expect(httpClient.post).toHaveBeenCalledWith(",
+          "      'http://localhost:8080/api/project',",
+          "      jasmine.objectContaining({ name: 'Test', description: 'desc', owner_id: 1 })",
+          "    );",
+          "    expect(component.loadProjects).toHaveBeenCalled();",
+          "    expect(component.showCreateForm).toBeFalse();",
+          "    done();",
+          "  });",
+          "});"
+        ]
+      }
+    },
+    "ai_short_rules": [
+      "Toujours créer les mocks avant d’appeler la méthode testée.",
+      "Toujours utiliser fixture.detectChanges() après modification du composant.",
+      "Toujours gérer l’asynchronie avec done() ou fakeAsync().",
+      "Utiliser [data-testid] ou textContent pour cibler des éléments du DOM.",
+      "Ne jamais utiliser :contains(), :eq(), :visible(), etc.",
+      "Toujours mocker localStorage, alert et console.error.",
+      "Vérifier les effets de bord, pas les retours de subscribe()."
+    ]
+  }
+}
