@@ -15,11 +15,11 @@ npm i -g @angular/cli
 ```
 
 Then install dependency
-bash```
+```
 npm i
 ```
 And start the server
-bash```
+```
 ng serve
 ```
 disponible at 'localhost:4200'
